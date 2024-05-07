@@ -4,6 +4,7 @@
       "target": "ESNext",
       "module": "commonjs",
       "rootDir": "src", // 源代码存放路径
-    }
+      "jsx": "react-jsx",  // 配置tsx类型文件的解析方式
+    },
   }
   

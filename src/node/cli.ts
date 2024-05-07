@@ -12,7 +12,6 @@ cli.command("dev [root]", "start dev server").action(async (root: string) => {
     await server.listen()
     // 在日志内输出运行地址
     server.printUrls()
-    // console.log("dev: " + root)
 })
 
 cli.command("build [root]", "build in production").action(async (root: string) => {

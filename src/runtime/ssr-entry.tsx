@@ -1,10 +1,10 @@
-import { App } from "./App";
-import { renderToString } from "react-dom/server"
+import { App } from './App';
+import { renderToString } from 'react-dom/server';
 
 /**
  * 服务器端渲染逻辑
- * @returns 
+ * @returns
  */
 export function render() {
-    return renderToString(<App />)
+  return renderToString(<App />);
 }

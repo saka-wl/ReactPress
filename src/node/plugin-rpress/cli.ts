@@ -1,28 +1,37 @@
-import cac from "cac";
-import { createDevServer } from "./dev";
-import { resolve } from "path";
-import { build } from "./build";
+import cac from 'cac';
+import { createDevServer } from './dev';
+import { resolve } from 'path';
+import { build } from './build';
 
-const cli = cac("rpress").version("0.0.1").help()
+const cli = cac('rpress').version('0.0.1').help();
 
 /**
  * 创建一个npm命令
  */
-cli.command("dev [root]", "start dev server").action(async (root: string) => {
-    // root为传入的目录，没有就默认为程序当前运行命令
-    const server = await createDevServer(root)
-    await server.listen()
-    // 在日志内输出运行地址
-    server.printUrls()
-})
+cli.command('dev [root]', 'start dev server').action(async (root: string) => {
+  // root为传入的目录，没有就默认为程序当前运行命令
+  const server = await createDevServer(root);
+  await server.listen();
+  // 在日志内输出运行地址
+  server.printUrls();
+});
 
-cli.command("build [root]", "build in production").action(async (root: string) => {
+/**
+ * 流程：（将runtime内的app.jsx遍历转换为index.html与js）
+ * 将目标目录root先
+ * vite打包生成client + server ->
+ * 处理index.html文件，加入script标签 ->
+ * 生成文件，删除
+ */
+cli
+  .command('build [root]', 'build in production')
+  .action(async (root: string) => {
     try {
-        root = resolve(root)
-        await build(root)
+      root = resolve(root);
+      await build(root);
     } catch (err) {
-        console.log(err)
+      console.log(err);
     }
-})
+  });
 
-cli.parse()
+cli.parse();

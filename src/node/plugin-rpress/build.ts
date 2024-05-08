@@ -1,24 +1,29 @@
+import { InlineConfig, build as viteBuild } from 'vite';
+import { CLIENT_ENTRY_PATH, SERVER_ENTRY_PATH } from '../constant';
+import { join } from 'path';
+import type { RollupOutput } from 'rollup';
+import fs from 'fs-extra';
+import { pathToFileURL } from 'url';
 
-import { InlineConfig, build as viteBuild } from "vite"
-import { CLIENT_ENTRY_PATH, SERVER_ENTRY_PATH } from "../constant"
-import path = require("path")
-import type { RollupOutput } from "rollup"
-import * as fs from "fs-extra"
+// const dynamicImport = new Function("m", "return import(m)")
 
 /**
- * 
- * @param render 
- * @param root 
- * @param clientBundle 
+ * 渲染出index.html
+ * 处理chunk动态页面
+ * @param render
+ * @param root
+ * @param clientBundle
  */
 export async function renderPage(
-    render: () => string,
-    root: string,
-    clientBundle: RollupOutput
+  render: () => string,
+  root: string,
+  clientBundle: RollupOutput
 ) {
-    const appHtml = render()
-    const clientChunk = clientBundle.output.find(chunk => chunk.type === "chunk" && chunk.isEntry)
-    const html = `<!DOCTYPE html>
+  const appHtml = render();
+  const clientChunk = clientBundle.output.find(
+    (chunk) => chunk.type === 'chunk' && chunk.isEntry
+  );
+  const html = `<!DOCTYPE html>
     <html lang="en">
     <head>
         <meta charset="UTF-8">
@@ -30,57 +35,74 @@ export async function renderPage(
         <script src="/${clientChunk.fileName}" type="module"></script>
     </body>
     </html>`.trim();
-    await fs.writeFile(path.join(root, 'build', 'index.html'), html)
-    await fs.remove(path.join(root, ".temp"))
+  await fs.ensureDir(join(root, 'build'));
+  await fs.writeFile(join(root, 'build/index.html'), html);
+  await fs.remove(join(root, '.temp'));
 }
 
 /**
  * SSG 的核心逻辑
- * @param root 
+ * 构建出client端 + server端
+ * @param root
  */
-export async function build(root: string) {
-    // 1. bundle client端 + server端
-    const [clientBundle, serverBundle] = await bundle(root)
-    // 2. 引入server-entry模块
-    const serverEntryPath = path.join(root, ".temp", "ssr-entry.js")
-    // 3. 服务端渲染，产出html内容
-    const { render } = require(serverEntryPath)
-    await renderPage(render, root, clientBundle as RollupOutput)
+export async function build(root: string = process.cwd()) {
+  // 1. bundle client端 + server端
+  const [clientBundle, serverBundle] = await bundle(root);
+  // 2. 引入server-entry模块
+  const serverEntryPath = join(root, '.temp', 'ssr-entry.js');
+  // 3. 服务端渲染，产出html内容
+  const { render } = await import(pathToFileURL(serverEntryPath).toString());
+
+  await renderPage(render, root, clientBundle);
 }
 
 /**
  * 完成客户端和服务器端的打包
- * @param root 
+ * @param root
  */
 export async function bundle(root: string) {
-    try {
-        console.log("client building + server building ...")
-        const resolveViteConfig = (isServer: boolean): InlineConfig => {
-            return {
-                mode: "production",
-                root,
-                build: {
-                    ssr: isServer,
-                    // 输出产物目录
-                    outDir: isServer ? ".temp" : 'build',
-                    rollupOptions: {
-                        input: isServer ? SERVER_ENTRY_PATH : CLIENT_ENTRY_PATH,
-                        output: {
-                            format: isServer ? "cjs" : "esm"
-                        }
-                    }
-                }
+  try {
+    console.log('client building + server building ...');
+    /**
+     * 在mjs中可以正常使用CJS模块
+     * 但在 CJS 中无法正常使用mjs模块
+     * 因为 CJS 模块是通过 require 进行同步加载的，
+     * 而 ESM 模块是通过 import 异步加载。
+     * 同步的 require 方法并不能导入 ESM 模块
+     */
+    const { default: ora } = await import('ora');
+    const spanner = ora();
+    spanner.start('Building client + server bundles ...');
+    const resolveViteConfig = (isServer: boolean): InlineConfig => {
+      return {
+        mode: 'production',
+        root,
+        build: {
+          ssr: isServer,
+          // 输出产物目录
+          outDir: isServer ? '.temp' : 'build',
+          rollupOptions: {
+            input: isServer ? SERVER_ENTRY_PATH : CLIENT_ENTRY_PATH,
+            output: {
+              format: isServer ? 'cjs' : 'esm'
             }
+          }
         }
-        const clientBuild = async () => {
-            return viteBuild(resolveViteConfig(false))
-        }
-        const serverBuild = async () => {
-            return viteBuild(resolveViteConfig(true))
-        }
-        const [clientBundle, serverBundle] = await Promise.all([clientBuild(), serverBuild()])
-        return [clientBundle, serverBundle]
-    } catch (err) {
-        console.log(err)
-    }
+      };
+    };
+    const clientBuild = async () => {
+      return viteBuild(resolveViteConfig(false));
+    };
+    const serverBuild = async () => {
+      return viteBuild(resolveViteConfig(true));
+    };
+    const [clientBundle, serverBundle] = await Promise.all([
+      clientBuild(),
+      serverBuild()
+    ]);
+    spanner.stop();
+    return [clientBundle, serverBundle] as [RollupOutput, RollupOutput];
+  } catch (err) {
+    console.log(err);
+  }
 }

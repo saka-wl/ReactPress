@@ -3,6 +3,11 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
+  "lint-staged": {
+    "**/*.{js,jsx,tsx,ts}": [
+      "eslint --fix"
+    ]
+  },
   "scripts": {
     "prepare": "husky install",
     "start": "tsup --watch",
@@ -45,6 +50,7 @@
     "husky": "^8.0.1",
     "commitlint": "^17.1.2",
     "@commitlint/cli": "^17.1.2",
-    "@commitlint/config-conventional": "^17.1.0"
+    "@commitlint/config-conventional": "^17.1.0",
+    "lint-staged": "^13.0.3"
   }
 }

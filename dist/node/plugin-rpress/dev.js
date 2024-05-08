@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.createDevServer = void 0;
 const vite_1 = require("vite");
 const index_js_1 = require("../constant/index.js");
-const indexHtml_js_1 = require("../plugin-rpress/indexHtml.js");
+const indexHtml_js_1 = require("./indexHtml.js");
 /**
  * pluginReact 为局部热更新
  */

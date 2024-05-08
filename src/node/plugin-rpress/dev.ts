@@ -1,6 +1,6 @@
 import { createServer as createViteDevServer } from "vite";
 import { PORT } from "../constant/index.js"
-import { pluginIndexHtml } from "../plugin-rpress/indexHtml.js";
+import { pluginIndexHtml } from "./indexHtml.js";
 /**
  * pluginReact 为局部热更新
  */

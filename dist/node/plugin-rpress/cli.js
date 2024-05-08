@@ -2,6 +2,8 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const cac_1 = require("cac");
 const dev_1 = require("./dev");
+const path_1 = require("path");
+const build_1 = require("./build");
 const cli = (0, cac_1.default)("rpress").version("0.0.1").help();
 /**
  * 创建一个npm命令
@@ -14,6 +16,12 @@ cli.command("dev [root]", "start dev server").action(async (root) => {
     server.printUrls();
 });
 cli.command("build [root]", "build in production").action(async (root) => {
-    console.log("dev: " + root);
+    try {
+        root = (0, path_1.resolve)(root);
+        await (0, build_1.build)(root);
+    }
+    catch (err) {
+        console.log(err);
+    }
 });
 cli.parse();

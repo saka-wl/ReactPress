@@ -7,3 +7,5 @@ dist
 bin
 esm-cjs
 docs
+esm-cjs
+e2e

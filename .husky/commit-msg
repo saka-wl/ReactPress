@@ -1,4 +1,5 @@
 #!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
 
+# 用来在提交通过前验证项目状态或提交信息
 npx --no-install commitlint --edit "$1"

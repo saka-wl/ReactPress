@@ -2,7 +2,7 @@ import { createRequire } from "module"; const require = createRequire(import.met
 import {
   __dirname,
   init_esm_shims
-} from "./chunk-FVIHHIYL.mjs";
+} from "./chunk-TS4P6XSU.mjs";
 
 // src/node/plugin-rpress/cli.ts
 init_esm_shims();
@@ -87,7 +87,10 @@ async function createDevServer(root = process.cwd()) {
     root,
     plugins: [pluginIndexHtml(), pluginReact()],
     server: {
-      port: PORT
+      port: PORT,
+      fs: {
+        allow: [PACKET_ROOT]
+      }
     }
   });
 }
@@ -131,7 +134,7 @@ async function build(root = process.cwd()) {
 async function bundle(root) {
   try {
     console.log("client building + server building ...");
-    const { default: ora } = await import("./ora-VY3Y2BZ6.mjs");
+    const { default: ora } = await import("./ora-FCTXDG5A.mjs");
     const spanner = ora();
     spanner.start("Building client + server bundles ...");
     const resolveViteConfig = (isServer) => {

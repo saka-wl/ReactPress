@@ -1,18 +1,18 @@
 "use strict"; function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { newObj[key] = obj[key]; } } } newObj.default = obj; return newObj; } } function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }var _module = require('module'); const require = _module.createRequire.call(void 0, import.meta.url);
 
 
-var _chunkOLIFEWY5js = require('./chunk-OLIFEWY5.js');
+var _chunkXPIMDWV3js = require('./chunk-XPIMDWV3.js');
 
 // src/node/plugin-rpress/cli.ts
-_chunkOLIFEWY5js.init_cjs_shims.call(void 0, );
+_chunkXPIMDWV3js.init_cjs_shims.call(void 0, );
 var _cac = require('cac'); var _cac2 = _interopRequireDefault(_cac);
 
 // src/node/plugin-rpress/dev.ts
-_chunkOLIFEWY5js.init_cjs_shims.call(void 0, );
+_chunkXPIMDWV3js.init_cjs_shims.call(void 0, );
 var _vite = require('vite');
 
 // src/node/constant/index.ts
-_chunkOLIFEWY5js.init_cjs_shims.call(void 0, );
+_chunkXPIMDWV3js.init_cjs_shims.call(void 0, );
 var _path = require('path');
 var PORT = 3001;
 var PACKET_ROOT = _path.join.call(void 0, __dirname, "..");
@@ -31,7 +31,7 @@ var SERVER_ENTRY_PATH = _path.join.call(void 0,
 );
 
 // src/node/plugin-rpress/indexHtml.ts
-_chunkOLIFEWY5js.init_cjs_shims.call(void 0, );
+_chunkXPIMDWV3js.init_cjs_shims.call(void 0, );
 var _promises = require('fs/promises');
 function pluginIndexHtml() {
   return {
@@ -86,7 +86,10 @@ async function createDevServer(root = process.cwd()) {
     root,
     plugins: [pluginIndexHtml(), _pluginreact2.default.call(void 0, )],
     server: {
-      port: PORT
+      port: PORT,
+      fs: {
+        allow: [PACKET_ROOT]
+      }
     }
   });
 }
@@ -95,7 +98,7 @@ async function createDevServer(root = process.cwd()) {
 
 
 // src/node/plugin-rpress/build.ts
-_chunkOLIFEWY5js.init_cjs_shims.call(void 0, );
+_chunkXPIMDWV3js.init_cjs_shims.call(void 0, );
 
 
 var _fsextra = require('fs-extra'); var _fsextra2 = _interopRequireDefault(_fsextra);
@@ -130,7 +133,7 @@ async function build(root = process.cwd()) {
 async function bundle(root) {
   try {
     console.log("client building + server building ...");
-    const { default: ora } = await Promise.resolve().then(() => _interopRequireWildcard(require("./ora-AAORZW2B.js")));
+    const { default: ora } = await Promise.resolve().then(() => _interopRequireWildcard(require("./ora-SXPEACQO.js")));
     const spanner = ora();
     spanner.start("Building client + server bundles ...");
     const resolveViteConfig = (isServer) => {

@@ -1,5 +1,5 @@
 import { createServer as createViteDevServer } from 'vite';
-import { PORT } from '../constant/index.js';
+import { PACKET_ROOT, PORT } from '../constant/index.js';
 import { pluginIndexHtml } from './indexHtml.js';
 /**
  * pluginReact 为局部热更新
@@ -16,7 +16,10 @@ export async function createDevServer(root: string = process.cwd()) {
     root,
     plugins: [pluginIndexHtml(), pluginReact()],
     server: {
-      port: PORT
+      port: PORT,
+      fs: {
+        allow: [PACKET_ROOT]
+      }
     }
   });
 }

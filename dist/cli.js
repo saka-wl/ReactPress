@@ -3,11 +3,11 @@
 
 var _chunkXPIMDWV3js = require('./chunk-XPIMDWV3.js');
 
-// src/node/plugin-rpress/cli.ts
+// src/node/cli.ts
 _chunkXPIMDWV3js.init_cjs_shims.call(void 0, );
 var _cac = require('cac'); var _cac2 = _interopRequireDefault(_cac);
 
-// src/node/plugin-rpress/dev.ts
+// src/node/dev.ts
 _chunkXPIMDWV3js.init_cjs_shims.call(void 0, );
 var _vite = require('vite');
 
@@ -79,9 +79,45 @@ function pluginIndexHtml() {
   };
 }
 
-// src/node/plugin-rpress/dev.ts
+// src/node/dev.ts
 var _pluginreact = require('@vitejs/plugin-react'); var _pluginreact2 = _interopRequireDefault(_pluginreact);
+
+// src/node/config.ts
+_chunkXPIMDWV3js.init_cjs_shims.call(void 0, );
+
+var _fsextra = require('fs-extra'); var _fsextra2 = _interopRequireDefault(_fsextra);
+
+function getUserConfigPath(root) {
+  try {
+    const supportConfigFiles = [
+      "config.ts",
+      "config.js"
+    ];
+    const configPath = supportConfigFiles.map((file) => _path.resolve.call(void 0, root, file)).find(_fsextra2.default.pathExistsSync);
+    return configPath;
+  } catch (err) {
+    console.log("Failed To Find UserConfig Path" + err);
+  }
+}
+async function resolveConfig(root, command, mode) {
+  const configPath = getUserConfigPath(root);
+  const result = await _vite.loadConfigFromFile.call(void 0, {
+    command,
+    mode
+  }, configPath, root);
+  if (result) {
+    const { config: rawConfig = {} } = result;
+    const userConfig = await (typeof rawConfig === "function" ? rawConfig() : rawConfig);
+    return [configPath, userConfig];
+  } else {
+    return [configPath, {}];
+  }
+}
+
+// src/node/dev.ts
 async function createDevServer(root = process.cwd()) {
+  const config = await resolveConfig(root, "serve", "development");
+  console.log(config);
   return _vite.createServer.call(void 0, {
     root,
     plugins: [pluginIndexHtml(), _pluginreact2.default.call(void 0, )],
@@ -94,14 +130,14 @@ async function createDevServer(root = process.cwd()) {
   });
 }
 
-// src/node/plugin-rpress/cli.ts
+// src/node/cli.ts
 
 
-// src/node/plugin-rpress/build.ts
+// src/node/build.ts
 _chunkXPIMDWV3js.init_cjs_shims.call(void 0, );
 
 
-var _fsextra = require('fs-extra'); var _fsextra2 = _interopRequireDefault(_fsextra);
+
 var _url = require('url');
 async function renderPage(render, root, clientBundle) {
   const appHtml = render();
@@ -170,7 +206,7 @@ async function bundle(root) {
   }
 }
 
-// src/node/plugin-rpress/cli.ts
+// src/node/cli.ts
 var cli = _cac2.default.call(void 0, "rpress").version("0.0.1").help();
 cli.command("dev [root]", "start dev server").action(async (root) => {
   const server = await createDevServer(root);

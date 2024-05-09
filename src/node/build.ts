@@ -1,5 +1,5 @@
 import { InlineConfig, build as viteBuild } from 'vite';
-import { CLIENT_ENTRY_PATH, SERVER_ENTRY_PATH } from '../constant';
+import { CLIENT_ENTRY_PATH, SERVER_ENTRY_PATH } from './constant';
 import { join } from 'path';
 import type { RollupOutput } from 'rollup';
 import fs from 'fs-extra';

@@ -4,11 +4,11 @@ import {
   init_esm_shims
 } from "./chunk-TS4P6XSU.mjs";
 
-// src/node/plugin-rpress/cli.ts
+// src/node/cli.ts
 init_esm_shims();
 import cac from "cac";
 
-// src/node/plugin-rpress/dev.ts
+// src/node/dev.ts
 init_esm_shims();
 import { createServer as createViteDevServer } from "vite";
 
@@ -80,9 +80,45 @@ function pluginIndexHtml() {
   };
 }
 
-// src/node/plugin-rpress/dev.ts
+// src/node/dev.ts
 import pluginReact from "@vitejs/plugin-react";
+
+// src/node/config.ts
+init_esm_shims();
+import { resolve } from "path";
+import fs from "fs-extra";
+import { loadConfigFromFile } from "vite";
+function getUserConfigPath(root) {
+  try {
+    const supportConfigFiles = [
+      "config.ts",
+      "config.js"
+    ];
+    const configPath = supportConfigFiles.map((file) => resolve(root, file)).find(fs.pathExistsSync);
+    return configPath;
+  } catch (err) {
+    console.log("Failed To Find UserConfig Path" + err);
+  }
+}
+async function resolveConfig(root, command, mode) {
+  const configPath = getUserConfigPath(root);
+  const result = await loadConfigFromFile({
+    command,
+    mode
+  }, configPath, root);
+  if (result) {
+    const { config: rawConfig = {} } = result;
+    const userConfig = await (typeof rawConfig === "function" ? rawConfig() : rawConfig);
+    return [configPath, userConfig];
+  } else {
+    return [configPath, {}];
+  }
+}
+
+// src/node/dev.ts
 async function createDevServer(root = process.cwd()) {
+  const config = await resolveConfig(root, "serve", "development");
+  console.log(config);
   return createViteDevServer({
     root,
     plugins: [pluginIndexHtml(), pluginReact()],
@@ -95,14 +131,14 @@ async function createDevServer(root = process.cwd()) {
   });
 }
 
-// src/node/plugin-rpress/cli.ts
-import { resolve } from "path";
+// src/node/cli.ts
+import { resolve as resolve2 } from "path";
 
-// src/node/plugin-rpress/build.ts
+// src/node/build.ts
 init_esm_shims();
 import { build as viteBuild } from "vite";
 import { join as join2 } from "path";
-import fs from "fs-extra";
+import fs2 from "fs-extra";
 import { pathToFileURL } from "url";
 async function renderPage(render, root, clientBundle) {
   const appHtml = render();
@@ -121,9 +157,9 @@ async function renderPage(render, root, clientBundle) {
         <script src="/${clientChunk.fileName}" type="module"></script>
     </body>
     </html>`.trim();
-  await fs.ensureDir(join2(root, "build"));
-  await fs.writeFile(join2(root, "build/index.html"), html);
-  await fs.remove(join2(root, ".temp"));
+  await fs2.ensureDir(join2(root, "build"));
+  await fs2.writeFile(join2(root, "build/index.html"), html);
+  await fs2.remove(join2(root, ".temp"));
 }
 async function build(root = process.cwd()) {
   const [clientBundle, serverBundle] = await bundle(root);
@@ -171,7 +207,7 @@ async function bundle(root) {
   }
 }
 
-// src/node/plugin-rpress/cli.ts
+// src/node/cli.ts
 var cli = cac("rpress").version("0.0.1").help();
 cli.command("dev [root]", "start dev server").action(async (root) => {
   const server = await createDevServer(root);
@@ -180,7 +216,7 @@ cli.command("dev [root]", "start dev server").action(async (root) => {
 });
 cli.command("build [root]", "build in production").action(async (root) => {
   try {
-    root = resolve(root);
+    root = resolve2(root);
     await build(root);
   } catch (err) {
     console.log(err);

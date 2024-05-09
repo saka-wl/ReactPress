@@ -1,7 +1,7 @@
 import { defineConfig } from 'tsup';
 
 export default defineConfig({
-  entry: ['src/node/plugin-rpress/cli.ts'],
+  entry: ['src/node/cli.ts'],
   bundle: true,
   splitting: true,
   outDir: 'dist',

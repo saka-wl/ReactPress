@@ -90,10 +90,7 @@ import fs from "fs-extra";
 import { loadConfigFromFile } from "vite";
 function getUserConfigPath(root) {
   try {
-    const supportConfigFiles = [
-      "config.ts",
-      "config.js"
-    ];
+    const supportConfigFiles = ["config.ts", "config.js"];
     const configPath = supportConfigFiles.map((file) => resolve(root, file)).find(fs.pathExistsSync);
     return configPath;
   } catch (err) {
@@ -102,10 +99,14 @@ function getUserConfigPath(root) {
 }
 async function resolveConfig(root, command, mode) {
   const configPath = getUserConfigPath(root);
-  const result = await loadConfigFromFile({
-    command,
-    mode
-  }, configPath, root);
+  const result = await loadConfigFromFile(
+    {
+      command,
+      mode
+    },
+    configPath,
+    root
+  );
   if (result) {
     const { config: rawConfig = {} } = result;
     const userConfig = await (typeof rawConfig === "function" ? rawConfig() : rawConfig);

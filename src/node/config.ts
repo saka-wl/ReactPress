@@ -20,14 +20,21 @@ function getUserConfigPath(root: string) {
   }
 }
 
+/**
+ * 获取用户自己书写的配置文件以及地址
+ * @param root
+ * @param command
+ * @param mode
+ * @returns
+ */
 export async function resolveConfig(
   root: string,
   command: 'serve' | 'build',
   mode: 'production' | 'development'
-) {
+): Promise<[string, UserConfig]> {
   // 1. 获取配置文件路径，支持 js，ts 格式
   const configPath = getUserConfigPath(root);
-  // 2. 解析配置文件
+  // 2. 解析配置文件，获取用户自定义解析内容
   const result = await loadConfigFromFile(
     {
       command,

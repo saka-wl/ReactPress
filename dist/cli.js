@@ -89,10 +89,7 @@ var _fsextra = require('fs-extra'); var _fsextra2 = _interopRequireDefault(_fsex
 
 function getUserConfigPath(root) {
   try {
-    const supportConfigFiles = [
-      "config.ts",
-      "config.js"
-    ];
+    const supportConfigFiles = ["config.ts", "config.js"];
     const configPath = supportConfigFiles.map((file) => _path.resolve.call(void 0, root, file)).find(_fsextra2.default.pathExistsSync);
     return configPath;
   } catch (err) {
@@ -101,10 +98,14 @@ function getUserConfigPath(root) {
 }
 async function resolveConfig(root, command, mode) {
   const configPath = getUserConfigPath(root);
-  const result = await _vite.loadConfigFromFile.call(void 0, {
-    command,
-    mode
-  }, configPath, root);
+  const result = await _vite.loadConfigFromFile.call(void 0, 
+    {
+      command,
+      mode
+    },
+    configPath,
+    root
+  );
   if (result) {
     const { config: rawConfig = {} } = result;
     const userConfig = await (typeof rawConfig === "function" ? rawConfig() : rawConfig);

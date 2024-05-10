@@ -1,5 +1,10 @@
+import { defineConfig } from "../dist"
 
-
-export default {
-    a: 1
-}
+export default defineConfig({
+    'description': "",
+    'themeConfig': {
+        'nav': []
+    },
+    'title': 'SAKA_WL————',
+    'vite': {}
+})

@@ -1,145 +1,21 @@
-import { createRequire } from "module"; const require = createRequire(import.meta.url);
 import {
-  __dirname,
+  CLIENT_ENTRY_PATH,
+  SERVER_ENTRY_PATH
+} from "./chunk-JEWFH6AK.mjs";
+import {
   init_esm_shims
-} from "./chunk-TS4P6XSU.mjs";
+} from "./chunk-XDH75DKF.mjs";
 
 // src/node/cli.ts
 init_esm_shims();
 import cac from "cac";
-
-// src/node/dev.ts
-init_esm_shims();
-import { createServer as createViteDevServer } from "vite";
-
-// src/node/constant/index.ts
-init_esm_shims();
-import { join } from "path";
-var PORT = 3001;
-var PACKET_ROOT = join(__dirname, "..");
-var DEFAULT_TEMPLATE_PATH = join(PACKET_ROOT, "template.html");
-var CLIENT_ENTRY_PATH = join(
-  PACKET_ROOT,
-  "src",
-  "runtime",
-  "client-entry.tsx"
-);
-var SERVER_ENTRY_PATH = join(
-  PACKET_ROOT,
-  "src",
-  "runtime",
-  "ssr-entry.tsx"
-);
-
-// src/node/plugin-rpress/indexHtml.ts
-init_esm_shims();
-import { readFile } from "fs/promises";
-function pluginIndexHtml() {
-  return {
-    name: "rpress:index-html",
-    /**
-     * 在template.html中加入script标签，可以修改html内容
-     * 介绍：https://juejin.cn/post/7210278786592292920#heading-3
-     * @param html
-     * @returns
-     */
-    transformIndexHtml(html) {
-      return {
-        html,
-        tags: [
-          {
-            tag: "script",
-            attrs: {
-              type: "module",
-              src: `/@fs/${CLIENT_ENTRY_PATH}`
-            },
-            injectTo: "body"
-          }
-        ]
-      };
-    },
-    /**
-     * 配置服务器
-     * @param server
-     * @returns
-     */
-    configureServer(server) {
-      return () => {
-        server.middlewares.use(async (req, res, next) => {
-          let content = await readFile(DEFAULT_TEMPLATE_PATH, "utf-8");
-          content = await server.transformIndexHtml(
-            req.url,
-            content,
-            req.originalUrl
-          );
-          res.setHeader("Content-Type", "text/html");
-          res.end(content);
-        });
-      };
-    }
-  };
-}
-
-// src/node/dev.ts
-import pluginReact from "@vitejs/plugin-react";
-
-// src/node/config.ts
-init_esm_shims();
 import { resolve } from "path";
-import fs from "fs-extra";
-import { loadConfigFromFile } from "vite";
-function getUserConfigPath(root) {
-  try {
-    const supportConfigFiles = ["config.ts", "config.js"];
-    const configPath = supportConfigFiles.map((file) => resolve(root, file)).find(fs.pathExistsSync);
-    return configPath;
-  } catch (err) {
-    console.log("Failed To Find UserConfig Path" + err);
-  }
-}
-async function resolveConfig(root, command, mode) {
-  const configPath = getUserConfigPath(root);
-  const result = await loadConfigFromFile(
-    {
-      command,
-      mode
-    },
-    configPath,
-    root
-  );
-  if (result) {
-    const { config: rawConfig = {} } = result;
-    const userConfig = await (typeof rawConfig === "function" ? rawConfig() : rawConfig);
-    return [configPath, userConfig];
-  } else {
-    return [configPath, {}];
-  }
-}
-
-// src/node/dev.ts
-async function createDevServer(root = process.cwd()) {
-  const config = await resolveConfig(root, "serve", "development");
-  console.log(config);
-  return createViteDevServer({
-    root,
-    plugins: [pluginIndexHtml(), pluginReact()],
-    server: {
-      port: PORT,
-      fs: {
-        allow: [PACKET_ROOT]
-      }
-    }
-  });
-}
-
-// src/node/cli.ts
-import { resolve as resolve2 } from "path";
 
 // src/node/build.ts
 init_esm_shims();
 import { build as viteBuild } from "vite";
-import { join as join2 } from "path";
-import fs2 from "fs-extra";
+import { join } from "path";
+import fs from "fs-extra";
 import { pathToFileURL } from "url";
 async function renderPage(render, root, clientBundle) {
   const appHtml = render();
@@ -158,20 +34,20 @@ async function renderPage(render, root, clientBundle) {
         <script src="/${clientChunk.fileName}" type="module"></script>
     </body>
     </html>`.trim();
-  await fs2.ensureDir(join2(root, "build"));
-  await fs2.writeFile(join2(root, "build/index.html"), html);
-  await fs2.remove(join2(root, ".temp"));
+  await fs.ensureDir(join(root, "build"));
+  await fs.writeFile(join(root, "build/index.html"), html);
+  await fs.remove(join(root, ".temp"));
 }
 async function build(root = process.cwd()) {
   const [clientBundle, serverBundle] = await bundle(root);
-  const serverEntryPath = join2(root, ".temp", "ssr-entry.js");
+  const serverEntryPath = join(root, ".temp", "ssr-entry.js");
   const { render } = await import(pathToFileURL(serverEntryPath).toString());
   await renderPage(render, root, clientBundle);
 }
 async function bundle(root) {
   try {
     console.log("client building + server building ...");
-    const { default: ora } = await import("./ora-FCTXDG5A.mjs");
+    const { default: ora } = await import("./ora-KYAXMP6E.mjs");
     const spanner = ora();
     spanner.start("Building client + server bundles ...");
     const resolveViteConfig = (isServer) => {
@@ -211,13 +87,20 @@ async function bundle(root) {
 // src/node/cli.ts
 var cli = cac("rpress").version("0.0.1").help();
 cli.command("dev [root]", "start dev server").action(async (root) => {
-  const server = await createDevServer(root);
-  await server.listen();
-  server.printUrls();
+  const createServer = async () => {
+    const { createDevServer } = await import("./dev.mjs");
+    const server = await createDevServer(root, async () => {
+      await server.close();
+      await createServer();
+    });
+    await server.listen();
+    server.printUrls();
+  };
+  await createServer();
 });
 cli.command("build [root]", "build in production").action(async (root) => {
   try {
-    root = resolve2(root);
+    root = resolve(root);
     await build(root);
   } catch (err) {
     console.log(err);

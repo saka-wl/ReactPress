@@ -10,10 +10,16 @@ const cli = cac('rpress').version('0.0.1').help();
  */
 cli.command('dev [root]', 'start dev server').action(async (root: string) => {
   // root为传入的目录，没有就默认为程序当前运行命令
-  const server = await createDevServer(root);
-  await server.listen();
-  // 在日志内输出运行地址
-  server.printUrls();
+  const createServer = async () => {
+    const { createDevServer } = await import('./dev.js');
+    const server = await createDevServer(root, async () => {
+      await server.close();
+      await createServer();
+    });
+    await server.listen();
+    server.printUrls();
+  };
+  await createServer();
 });
 
 /**

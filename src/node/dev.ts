@@ -6,18 +6,23 @@ import { pluginIndexHtml } from './plugin-rpress/indexHtml.js';
  */
 import pluginReact from '@vitejs/plugin-react';
 import { resolveConfig } from './config.js';
+import { pluginConfig } from './plugin-rpress/config.js';
 
 /**
  * 创建一个vite开发服务器
  * @param root
  * @returns
  */
-export async function createDevServer(root: string = process.cwd()) {
+export async function createDevServer(
+  root: string = process.cwd(),
+  restart: () => Promise<void>
+) {
   const config = await resolveConfig(root, 'serve', 'development');
-  console.log(config);
+  console.log(config.siteData);
+  // console.log(config);
   return createViteDevServer({
     root,
-    plugins: [pluginIndexHtml(), pluginReact()],
+    plugins: [pluginIndexHtml(), pluginReact(), pluginConfig(config, restart)],
     server: {
       port: PORT,
       fs: {

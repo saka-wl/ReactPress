@@ -7,5 +7,6 @@
     "jsx": "react-jsx", // 配置tsx类型文件的解析方式
     "skipLibCheck": true, // 处理 FSWatcher 报错
     "esModuleInterop": true,
+    "baseUrl": "src"
   }
 }

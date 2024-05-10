@@ -1,7 +1,7 @@
 import { resolve } from 'path';
 import fs from 'fs-extra';
 import { loadConfigFromFile } from 'vite';
-import { UserConfig } from '../shared/types';
+import { SiteConfig, ThemeConfig, UserConfig } from '../shared/types';
 
 type RawConfig =
   | UserConfig
@@ -27,10 +27,10 @@ function getUserConfigPath(root: string) {
  * @param mode
  * @returns
  */
-export async function resolveConfig(
+export async function resolveUserConfig(
   root: string,
   command: 'serve' | 'build',
-  mode: 'production' | 'development'
+  mode: 'development' | 'production'
 ): Promise<[string, UserConfig]> {
   // 1. 获取配置文件路径，支持 js，ts 格式
   const configPath = getUserConfigPath(root);
@@ -52,8 +52,35 @@ export async function resolveConfig(
     const userConfig = await (typeof rawConfig === 'function'
       ? rawConfig()
       : rawConfig);
-    return [configPath, userConfig] as const;
+    return [configPath, userConfig as UserConfig] as const;
   } else {
     return [configPath, {} as UserConfig] as const;
   }
+}
+
+export function resolveSiteData(userConfig: UserConfig): UserConfig {
+  return {
+    title: userConfig.title || 'Rpress.js',
+    description: userConfig.description || 'SSG Framework',
+    themeConfig: userConfig.themeConfig || ({} as ThemeConfig),
+    vite: userConfig.vite || {}
+  };
+}
+
+export async function resolveConfig(
+  root: string,
+  command: 'serve' | 'build',
+  mode: 'production' | 'development'
+): Promise<SiteConfig> {
+  const [configPath, userConfig] = await resolveUserConfig(root, command, mode);
+  const siteConfig: SiteConfig = {
+    root,
+    configPath,
+    siteData: resolveSiteData(userConfig as UserConfig)
+  };
+  return siteConfig;
+}
+
+export function defineConfig(config: UserConfig): UserConfig {
+  return config;
 }

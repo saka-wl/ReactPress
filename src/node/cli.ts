@@ -2,6 +2,7 @@ import cac from 'cac';
 import { createDevServer } from './dev';
 import { resolve } from 'path';
 import { build } from './build';
+import { resolveConfig } from './config';
 
 const cli = cac('rpress').version('0.0.1').help();
 
@@ -11,7 +12,7 @@ const cli = cac('rpress').version('0.0.1').help();
 cli.command('dev [root]', 'start dev server').action(async (root: string) => {
   // root为传入的目录，没有就默认为程序当前运行命令
   const createServer = async () => {
-    const { createDevServer } = await import('./dev.js');
+    // const { createDevServer } = await import('./dev.js');
     const server = await createDevServer(root, async () => {
       await server.close();
       await createServer();
@@ -34,7 +35,8 @@ cli
   .action(async (root: string) => {
     try {
       root = resolve(root);
-      await build(root);
+      const config = await resolveConfig(root, 'build', 'production');
+      await build(root, config);
     } catch (err) {
       console.log(err);
     }

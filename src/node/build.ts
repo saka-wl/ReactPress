@@ -4,8 +4,11 @@ import { join } from 'path';
 import type { RollupOutput } from 'rollup';
 import fs from 'fs-extra';
 import { pathToFileURL } from 'url';
+import { SiteConfig } from 'shared/types';
+import pluginReact from '@vitejs/plugin-react';
+import { pluginConfig } from './plugin-rpress/config';
 
-// const dynamicImport = new Function("m", "return import(m)")
+const dynamicImport = new Function('m', 'return import(m)');
 
 /**
  * 渲染出index.html
@@ -45,22 +48,24 @@ export async function renderPage(
  * 构建出client端 + server端
  * @param root
  */
-export async function build(root: string = process.cwd()) {
+export async function build(root: string = process.cwd(), config: SiteConfig) {
   // 1. bundle client端 + server端
-  const [clientBundle, serverBundle] = await bundle(root);
+  const [clientBundle, serverBundle] = await bundle(root, config);
   // 2. 引入server-entry模块
   const serverEntryPath = join(root, '.temp', 'ssr-entry.js');
   // 3. 服务端渲染，产出html内容
+  console.log(pathToFileURL(serverEntryPath).toString());
   const { render } = await import(pathToFileURL(serverEntryPath).toString());
+  // const { render } = await import(serverEntryPath)
 
-  await renderPage(render, root, clientBundle);
+  await renderPage(render, root, clientBundle as RollupOutput);
 }
 
 /**
  * 完成客户端和服务器端的打包
  * @param root
  */
-export async function bundle(root: string) {
+export async function bundle(root: string, config: SiteConfig) {
   try {
     console.log('client building + server building ...');
     /**
@@ -70,17 +75,26 @@ export async function bundle(root: string) {
      * 而 ESM 模块是通过 import 异步加载。
      * 同步的 require 方法并不能导入 ESM 模块
      */
-    const { default: ora } = await import('ora');
-    const spanner = ora();
-    spanner.start('Building client + server bundles ...');
+    const { default: ora } = await dynamicImport('ora');
+
+    // console.log(root) // D:\font\mydemo\ReactPress\docs
+
+    const spanner = ora('loading').start(
+      'Building client + server bundles ...'
+    );
     const resolveViteConfig = (isServer: boolean): InlineConfig => {
       return {
         mode: 'production',
         root,
+        plugins: [pluginReact(), pluginConfig(config)],
+        ssr: {
+          // 注意加上这个配置，防止 cjs 产物中 require ESM 的产物，因为 react-router-dom 的产物为 ESM 格式
+          noExternal: ['react-router-dom']
+        },
         build: {
           ssr: isServer,
           // 输出产物目录
-          outDir: isServer ? '.temp' : 'build',
+          outDir: isServer ? join(root, '.temp') : join(root, 'build'),
           rollupOptions: {
             input: isServer ? SERVER_ENTRY_PATH : CLIENT_ENTRY_PATH,
             output: {
@@ -101,7 +115,12 @@ export async function bundle(root: string) {
       serverBuild()
     ]);
     spanner.stop();
+
     return [clientBundle, serverBundle] as [RollupOutput, RollupOutput];
+    // return {
+    //   clientBundle,
+    //   serverBundle
+    // }
   } catch (err) {
     console.log(err);
   }

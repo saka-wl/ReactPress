@@ -1,22 +1,24 @@
 import {
   CLIENT_ENTRY_PATH,
-  SERVER_ENTRY_PATH
-} from "./chunk-JEWFH6AK.mjs";
+  SERVER_ENTRY_PATH,
+  createDevServer,
+  pluginConfig
+} from "./chunk-ZQ5YEDSK.mjs";
 import {
-  init_esm_shims
-} from "./chunk-XDH75DKF.mjs";
+  resolveConfig
+} from "./chunk-4J7KUVM4.mjs";
 
 // src/node/cli.ts
-init_esm_shims();
 import cac from "cac";
 import { resolve } from "path";
 
 // src/node/build.ts
-init_esm_shims();
 import { build as viteBuild } from "vite";
 import { join } from "path";
 import fs from "fs-extra";
 import { pathToFileURL } from "url";
+import pluginReact from "@vitejs/plugin-react";
+var dynamicImport = new Function("m", "return import(m)");
 async function renderPage(render, root, clientBundle) {
   const appHtml = render();
   const clientChunk = clientBundle.output.find(
@@ -38,26 +40,31 @@ async function renderPage(render, root, clientBundle) {
   await fs.writeFile(join(root, "build/index.html"), html);
   await fs.remove(join(root, ".temp"));
 }
-async function build(root = process.cwd()) {
-  const [clientBundle, serverBundle] = await bundle(root);
+async function build(root = process.cwd(), config) {
+  const [clientBundle, serverBundle] = await bundle(root, config);
   const serverEntryPath = join(root, ".temp", "ssr-entry.js");
+  console.log(pathToFileURL(serverEntryPath).toString());
   const { render } = await import(pathToFileURL(serverEntryPath).toString());
   await renderPage(render, root, clientBundle);
 }
-async function bundle(root) {
+async function bundle(root, config) {
   try {
     console.log("client building + server building ...");
-    const { default: ora } = await import("./ora-KYAXMP6E.mjs");
-    const spanner = ora();
-    spanner.start("Building client + server bundles ...");
+    const { default: ora } = await dynamicImport("ora");
+    const spanner = ora("loading").start("Building client + server bundles ...");
     const resolveViteConfig = (isServer) => {
       return {
         mode: "production",
         root,
+        plugins: [pluginReact(), pluginConfig(config)],
+        ssr: {
+          // 注意加上这个配置，防止 cjs 产物中 require ESM 的产物，因为 react-router-dom 的产物为 ESM 格式 
+          noExternal: ["react-router-dom"]
+        },
         build: {
           ssr: isServer,
           // 输出产物目录
-          outDir: isServer ? ".temp" : "build",
+          outDir: isServer ? join(root, ".temp") : join(root, "build"),
           rollupOptions: {
             input: isServer ? SERVER_ENTRY_PATH : CLIENT_ENTRY_PATH,
             output: {
@@ -88,7 +95,6 @@ async function bundle(root) {
 var cli = cac("rpress").version("0.0.1").help();
 cli.command("dev [root]", "start dev server").action(async (root) => {
   const createServer = async () => {
-    const { createDevServer } = await import("./dev.mjs");
     const server = await createDevServer(root, async () => {
       await server.close();
       await createServer();
@@ -101,7 +107,8 @@ cli.command("dev [root]", "start dev server").action(async (root) => {
 cli.command("build [root]", "build in production").action(async (root) => {
   try {
     root = resolve(root);
-    await build(root);
+    const config = await resolveConfig(root, "build", "production");
+    await build(root, config);
   } catch (err) {
     console.log(err);
   }

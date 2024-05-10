@@ -1,6 +1,7 @@
-import { Plugin, ViteDevServer } from 'vite';
+import { Plugin } from 'vite';
 import { SiteConfig } from 'shared/types';
-import { relative } from 'path';
+import { join, relative } from 'path';
+import { PACKET_ROOT } from 'node/constant';
 
 const SITE_DATA_ID = 'rpress:site-data';
 
@@ -11,9 +12,8 @@ const SITE_DATA_ID = 'rpress:site-data';
  */
 export function pluginConfig(
   config: SiteConfig,
-  restart: () => Promise<void>
+  restart?: () => Promise<void>
 ): Plugin {
-  // let server: ViteDevServer | null = null
   return {
     name: SITE_DATA_ID,
     resolveId(id) {
@@ -27,11 +27,18 @@ export function pluginConfig(
         return `export default ${JSON.stringify(config.siteData)}`;
       }
     },
-    // configureServer(s) {
-    //     server = s;
-    // },
+    config() {
+      return {
+        root: PACKET_ROOT,
+        resolve: {
+          alias: {
+            '@runtime': join(PACKET_ROOT, 'src', 'runtime', 'index.ts')
+          }
+        }
+      };
+    },
     /**
-     * 配置文件热更新
+     * 配置文件热更新，配置文件修改时重新启动服务
      * @param ctx
      */
     async handleHotUpdate(ctx) {

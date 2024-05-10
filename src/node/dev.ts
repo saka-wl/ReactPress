@@ -21,7 +21,7 @@ export async function createDevServer(
   console.log(config.siteData);
   // console.log(config);
   return createViteDevServer({
-    root,
+    root: PACKET_ROOT,
     plugins: [pluginIndexHtml(), pluginReact(), pluginConfig(config, restart)],
     server: {
       port: PORT,

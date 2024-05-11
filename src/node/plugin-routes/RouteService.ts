@@ -26,6 +26,7 @@ export class RouteService {
       absolute: true,
       ignore: ['**/node_modules/**', '**/build/**', 'config.ts']
     }).sort();
+    console.log(files);
     files.forEach((file) => {
       const fileRelativePath = normalizePath(
         path.relative(this.#scanDir, file)

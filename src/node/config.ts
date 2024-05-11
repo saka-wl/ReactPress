@@ -44,7 +44,9 @@ export async function resolveUserConfig(
     root
   );
   if (result) {
+    // 这里的 rawConfig 就是用户的配置
     const { config: rawConfig = {} as RawConfig } = result;
+    // console.log('rawConfig： ', rawConfig)
     // 三种情况:
     // 1. object
     // 2. promise
@@ -67,6 +69,13 @@ export function resolveSiteData(userConfig: UserConfig): UserConfig {
   };
 }
 
+/**
+ * 获取用户配置的信息
+ * @param root
+ * @param command
+ * @param mode
+ * @returns
+ */
 export async function resolveConfig(
   root: string,
   command: 'serve' | 'build',

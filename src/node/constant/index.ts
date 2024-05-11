@@ -17,6 +17,10 @@ export const DEFAULT_TEMPLATE_PATH = join(PACKET_ROOT, 'template.html');
 
 /**
  * 客户端入口文件路径
+ *   PACKET_ROOT,
+  'src',
+  'runtime',
+  'client-entry.tsx'
  */
 export const CLIENT_ENTRY_PATH = join(
   PACKET_ROOT,

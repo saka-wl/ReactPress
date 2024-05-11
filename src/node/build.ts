@@ -55,6 +55,9 @@ export async function build(root: string = process.cwd(), config: SiteConfig) {
   const serverEntryPath = join(root, '.temp', 'ssr-entry.js');
   // 3. 服务端渲染，产出html内容
   console.log(pathToFileURL(serverEntryPath).toString());
+  /**
+   * react的render渲染函数
+   */
   const { render } = await import(pathToFileURL(serverEntryPath).toString());
   // const { render } = await import(serverEntryPath)
 

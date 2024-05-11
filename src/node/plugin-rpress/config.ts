@@ -17,16 +17,26 @@ export function pluginConfig(
   return {
     name: SITE_DATA_ID,
     resolveId(id) {
+      // console.log(id)
       if (id === SITE_DATA_ID) {
-        console.log('\0');
         return '\0' + SITE_DATA_ID;
       }
     },
+    /**
+     * load钩子可拦截文件读取，模块引入读取操作，例如我想拦截某个组件读取，这样写后，对应的组件里面的内容加载时就会被替换成返回的内容
+     * 这里就是向网页导出用户配置的信息
+     * @param id
+     * @returns
+     */
     load(id) {
       if (id === '\0' + SITE_DATA_ID) {
         return `export default ${JSON.stringify(config.siteData)}`;
       }
     },
+    /**
+     * 配置地址别名
+     * @returns
+     */
     config() {
       return {
         root: PACKET_ROOT,

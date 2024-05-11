@@ -3,7 +3,7 @@ import {
   SERVER_ENTRY_PATH,
   createDevServer,
   pluginConfig
-} from "./chunk-ZQ5YEDSK.mjs";
+} from "./chunk-FNISFTBR.mjs";
 import {
   resolveConfig
 } from "./chunk-4J7KUVM4.mjs";
@@ -51,14 +51,16 @@ async function bundle(root, config) {
   try {
     console.log("client building + server building ...");
     const { default: ora } = await dynamicImport("ora");
-    const spanner = ora("loading").start("Building client + server bundles ...");
+    const spanner = ora("loading").start(
+      "Building client + server bundles ..."
+    );
     const resolveViteConfig = (isServer) => {
       return {
         mode: "production",
         root,
         plugins: [pluginReact(), pluginConfig(config)],
         ssr: {
-          // 注意加上这个配置，防止 cjs 产物中 require ESM 的产物，因为 react-router-dom 的产物为 ESM 格式 
+          // 注意加上这个配置，防止 cjs 产物中 require ESM 的产物，因为 react-router-dom 的产物为 ESM 格式
           noExternal: ["react-router-dom"]
         },
         build: {

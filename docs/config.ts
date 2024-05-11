@@ -5,6 +5,6 @@ export default defineConfig({
     'themeConfig': {
         'nav': []
     },
-    'title': 'SAKA_WL————',
+    'title': 'SAKA_WL',
     'vite': {}
 })

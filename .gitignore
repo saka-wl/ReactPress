@@ -1,6 +1,8 @@
 
 **/node_modules/**
 
-/esm-cjs
+esm-cjs/
 
-/dist/**
+dist/
+
+docs/

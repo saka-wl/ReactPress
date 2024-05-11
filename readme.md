@@ -1,5 +1,5 @@
 ## 2024-5-10
-整理1-12知识点
+整理`1-12`知识点
 程序的入口是`cli.ts`，有两种命令可以使用：`rpress dev [root]`与`rpress dev [root]`
 先讲讲`rpress dev [root]`，这是用来预览程序的，下面是实现方式：
 

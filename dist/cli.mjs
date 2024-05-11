@@ -3,7 +3,7 @@ import {
   SERVER_ENTRY_PATH,
   createDevServer,
   pluginConfig
-} from "./chunk-FNISFTBR.mjs";
+} from "./chunk-3MPTF7CW.mjs";
 import {
   resolveConfig
 } from "./chunk-4J7KUVM4.mjs";

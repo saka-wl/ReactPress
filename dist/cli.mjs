@@ -2,8 +2,8 @@ import {
   CLIENT_ENTRY_PATH,
   SERVER_ENTRY_PATH,
   createDevServer,
-  pluginConfig
-} from "./chunk-3MPTF7CW.mjs";
+  createVitePlugins
+} from "./chunk-JZLFDSGY.mjs";
 import {
   resolveConfig
 } from "./chunk-4J7KUVM4.mjs";
@@ -17,7 +17,6 @@ import { build as viteBuild } from "vite";
 import { join } from "path";
 import fs from "fs-extra";
 import { pathToFileURL } from "url";
-import pluginReact from "@vitejs/plugin-react";
 var dynamicImport = new Function("m", "return import(m)");
 async function renderPage(render, root, clientBundle) {
   const appHtml = render();
@@ -58,7 +57,7 @@ async function bundle(root, config) {
       return {
         mode: "production",
         root,
-        plugins: [pluginReact(), pluginConfig(config)],
+        plugins: createVitePlugins(config),
         ssr: {
           // 注意加上这个配置，防止 cjs 产物中 require ESM 的产物，因为 react-router-dom 的产物为 ESM 格式
           noExternal: ["react-router-dom"]

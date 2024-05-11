@@ -1,13 +1,7 @@
 import { createServer as createViteDevServer } from 'vite';
 import { PACKET_ROOT, PORT } from './constant/index.js';
-import { pluginIndexHtml } from './plugin-rpress/indexHtml.js';
-/**
- * pluginReact 为局部热更新
- */
-import pluginReact from '@vitejs/plugin-react';
 import { resolveConfig } from './config.js';
-import { pluginConfig } from './plugin-rpress/config.js';
-import { pluginRoutes } from './plugin-routes';
+import { createVitePlugins } from './vitePlugins.js';
 
 /**
  * 创建一个vite开发服务器
@@ -37,16 +31,7 @@ export async function createDevServer(
   // console.log('config', config);
   return createViteDevServer({
     root: PACKET_ROOT,
-    plugins: [
-      pluginIndexHtml(),
-      pluginReact({
-        jsxRuntime: 'automatic'
-      }),
-      pluginConfig(config, restart),
-      pluginRoutes({
-        root: config.root
-      })
-    ],
+    plugins: createVitePlugins(config, restart) as Plugin[],
     server: {
       port: PORT,
       fs: {

@@ -35,10 +35,27 @@ export const rehypePluginShiki: Plugin<[Options], Root> = ({ codeToHtml }) => {
         const codeClassName = codeNode.properties?.className?.toString() || '';
         const lang = codeClassName.split('-')[1];
         if (!lang) return;
-        // 添加高亮
-        // console.log("highlightedCode", highlighter)
+        // codeContent 为 "console.log(123);\n"
+        // 转换为
+        /**
+         * '<pre class="shiki nord" style="background-color: #2e3440ff" tabindex="0">
+         * <code>
+         * <span class="line">
+         * <span style="color: #D8DEE9">console</span>
+         * <span style="color: #ECEFF4">.</span>
+         * <span style="color: #88C0D0">log</span>
+         * <span style="color: #D8DEE9FF">(</span>
+         * <span style="color: #B48EAD">123</span>
+         * <span style="color: #D8DEE9FF">)</span>
+         * <span style="color: #81A1C1">;</span>
+         * </span>
+         * \n
+         * <span class="line"></span>
+         * </code>
+         * </pre>'
+         */
         const highlightedCode = codeToHtml(codeContent, { lang });
-        // AST转换
+        // AST转换为js的格式
         const fragmentAST = fromHtml(highlightedCode, { fragment: true });
         parent.children.splice(index, 1, ...fragmentAST.children);
       }

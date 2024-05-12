@@ -3,7 +3,7 @@ import { visit } from 'unist-util-visit';
 import type { Element, Root } from 'hast';
 
 /**
- * 转换html内容
+ * 添加语言类型标签
  *   <pre>
  *       <code class="language-js">console.log(123);</code>
  *   </pre>
@@ -19,7 +19,6 @@ import type { Element, Root } from 'hast';
 export const rehypePluginPreWrapper: Plugin<[], Root> = () => {
   return (tree) => {
     visit(tree, 'element', (node) => {
-      // <pre><code>...</code></pre>
       // 1. 找到 pre 元素
       if (
         node.tagName === 'pre' &&

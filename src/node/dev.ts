@@ -31,7 +31,7 @@ export async function createDevServer(
   // console.log('config', config);
   return createViteDevServer({
     root: PACKET_ROOT,
-    plugins: createVitePlugins(config, restart) as Plugin[],
+    plugins: await createVitePlugins(config, restart),
     server: {
       port: PORT,
       fs: {

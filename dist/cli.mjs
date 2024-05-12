@@ -3,7 +3,7 @@ import {
   SERVER_ENTRY_PATH,
   createDevServer,
   createVitePlugins
-} from "./chunk-ML63RWKP.mjs";
+} from "./chunk-OFUE4B44.mjs";
 import {
   resolveConfig
 } from "./chunk-4J7KUVM4.mjs";
@@ -53,11 +53,11 @@ async function bundle(root, config) {
     const spanner = ora("loading").start(
       "Building client + server bundles ..."
     );
-    const resolveViteConfig = (isServer) => {
+    const resolveViteConfig = async (isServer) => {
       return {
         mode: "production",
         root,
-        plugins: createVitePlugins(config),
+        plugins: await createVitePlugins(config),
         ssr: {
           // 注意加上这个配置，防止 cjs 产物中 require ESM 的产物，因为 react-router-dom 的产物为 ESM 格式
           noExternal: ["react-router-dom"]
@@ -76,10 +76,10 @@ async function bundle(root, config) {
       };
     };
     const clientBuild = async () => {
-      return viteBuild(resolveViteConfig(false));
+      return viteBuild(await resolveViteConfig(false));
     };
     const serverBuild = async () => {
-      return viteBuild(resolveViteConfig(true));
+      return viteBuild(await resolveViteConfig(true));
     };
     const [clientBundle, serverBundle] = await Promise.all([
       clientBuild(),

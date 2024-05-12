@@ -2,6 +2,20 @@ import type { Plugin } from 'unified';
 import { visit } from 'unist-util-visit';
 import type { Element, Root } from 'hast';
 
+/**
+ * 转换html内容
+ *   <pre>
+ *       <code class="language-js">console.log(123);</code>
+ *   </pre>
+ *   -->>
+ *   <div class="language-js">
+ *       <span class="lang">js</span>
+ *       <pre>
+ *           <code class="">console.log(123);</code>
+ *       </pre>
+ *   </div>
+ * @returns
+ */
 export const rehypePluginPreWrapper: Plugin<[], Root> = () => {
   return (tree) => {
     visit(tree, 'element', (node) => {
@@ -11,14 +25,14 @@ export const rehypePluginPreWrapper: Plugin<[], Root> = () => {
         node.tagName === 'pre' &&
         node.children[0]?.type === 'element' &&
         node.children[0].tagName === 'code' &&
-        +!node.data?.isVisited
+        !node.data?.isVisited
       ) {
         const codeNode = node.children[0];
         const codeClassName = codeNode.properties?.className?.toString() || '';
         // language-xxx
         const lang = codeClassName.split('-')[1];
 
-        codeNode.properties.className = '';
+        // codeNode.properties.className = '';
 
         const clonedNode: Element = {
           type: 'element',

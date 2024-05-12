@@ -8,7 +8,7 @@ import { pluginConfig } from './plugin-rpress/config';
 import { pluginRoutes } from './plugin-routes';
 import { createMdxPlugins } from './plugin-mdx';
 
-export function createVitePlugins(
+export async function createVitePlugins(
   config: SiteConfig,
   restart?: () => Promise<void>
 ) {
@@ -21,6 +21,6 @@ export function createVitePlugins(
     pluginRoutes({
       root: config.root
     }),
-    createMdxPlugins()
+    await createMdxPlugins()
   ];
 }

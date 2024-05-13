@@ -6,3 +6,8 @@ declare module 'rpress:site-data' {
   const siteData: UserConfig;
   export default siteData;
 }
+
+declare module "*.module.scss" {
+  const classes: { [key: string]: string };
+  export default classes;
+}

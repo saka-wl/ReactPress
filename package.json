@@ -60,6 +60,7 @@
   "devDependencies": {
     "@commitlint/cli": "^17.1.2",
     "@commitlint/config-conventional": "^17.1.0",
+    "@iconify-json/carbon": "^1.1.32",
     "@loadable/component": "^5.16.4",
     "@playwright/test": "1.26.1",
     "@types/fs-extra": "^11.0.4",
@@ -81,6 +82,7 @@
     "ora": "^8.0.1",
     "prettier": "2.8.8",
     "remark-mdx": "^3.0.1",
+    "sass": "^1.77.1",
     "serve": "^14.2.3",
     "tsup": "^8.0.2",
     "tsx": "3.8.2",

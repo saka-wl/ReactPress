@@ -44,6 +44,11 @@ export function pluginConfig(
           alias: {
             '@runtime': join(PACKET_ROOT, 'src', 'runtime', 'index.ts')
           }
+        },
+        css: {
+          modules: {
+            localsConvention: 'camelCaseOnly'
+          }
         }
       };
     },

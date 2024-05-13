@@ -1,6 +1,9 @@
 import { Content } from '@runtime';
 import 'uno.css';
 import { usePageData } from '../../runtime';
+import '../style/base.css';
+import '../style/vars.css';
+import { Nav } from '../components/Nav';
 
 export function Layout() {
   const pageData = usePageData();
@@ -19,8 +22,8 @@ export function Layout() {
 
   return (
     <>
-      <p>Nav</p>
-      <div>{getContent()}</div>
+      <Nav />
+      {/* <div>{getContent()}</div> */}
     </>
   );
 }

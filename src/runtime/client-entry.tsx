@@ -4,7 +4,7 @@ import siteData from 'rpress:site-data';
 import { BrowserRouter } from 'react-router-dom';
 
 function renderInBrowser() {
-  console.log(siteData);
+  // console.log(siteData);
   const containerEl = document.getElementById('root');
   if (!containerEl) {
     throw new Error('root element not found');

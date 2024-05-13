@@ -3,6 +3,7 @@ import { RouteService } from './RouteService';
 
 interface PluginOption {
   root: string;
+  isSSR: boolean;
 }
 
 export const CONVENTIONAL_ROUTE_ID = 'rpress:routes';
@@ -10,7 +11,7 @@ export const CONVENTIONAL_ROUTE_ID = 'rpress:routes';
 export function pluginRoutes(options: PluginOption): Plugin {
   const routerService = new RouteService(options.root);
   return {
-    name: 'rpress:routes',
+    name: CONVENTIONAL_ROUTE_ID,
     async configResolved() {
       await routerService.init();
     },
@@ -21,7 +22,7 @@ export function pluginRoutes(options: PluginOption): Plugin {
     },
     load(id) {
       if (id === '\0' + CONVENTIONAL_ROUTE_ID) {
-        return routerService.generateRoutesCode();
+        return routerService.generateRoutesCode(options.isSSR || false);
       }
     }
   };

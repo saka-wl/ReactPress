@@ -1,4 +1,5 @@
-## 2024-5-10
+## ReactPress
+
 `Rpress`大纲
 程序的入口是`cli.ts`，有两种命令可以使用：`rpress dev [root]`与`rpress dev [root]`
 
@@ -33,11 +34,22 @@
 - 然后讲讲`rpress dev [root]`的实现，用来打包程序的，下面是实现方式：
 
 1. 先通过`cac`来识别`rpress build [root]`命令，可以获取到`[root]`路径
-2. 然后通过`vite`的`build`方法来打包`client`和`server`端，其中`server`端的数据打包放在`.temp`文件夹中；`client`端打包放在`build`文件夹中
-   - 在`client`端中使用了`react`的`render`函数来打包`html`数据，然后将打包完成的数据放在`<div id="root">`中
-   - 在`client`端中使用了`vite`中的`build`方法来打包`js`数据，然后打包完成之后放在`assets`文件夹中，以及会在`indedx.html`中的`<script src="/..." type="module"`来引用
 
+2. 然后加入运行上述的插件
 
+3. 接下来就要进行打包操作，分为浏览器端`client-entry`和服务器端`ssr-entry`，服务器端打包的文件只会在服务器进行运行，进行一些浏览器端路由生成等操作，不会上传到浏览器端，等浏览器端文件打包完成，我们完全可以删除服务器端文件
+
+   - 浏览器端打包：我们先从`client-entry`入口进入，然后进行打包，会得到一个`RollupOutput`类型的文件里面包含了浏览器端文件的`js`逻辑代码，我们将这些`js`文件打包在了`assets`文件夹中
+
+     <img src="C:\Users\aywzc\AppData\Roaming\Typora\typora-user-images\image-20240513110154829.png" alt="image-20240513110154829" style="zoom: 80%;" />
+
+   - 服务器端打包：我们先从`ssr-entry`入口进入，然后进行打包，会得到`render`与`routes`（用户自己创建的路由），用来渲染路由文件与确认有哪些路由
+
+   - 接下来会将所有的路由文件依次添加到`html`模板中，包括`html`代码和`js`逻辑，然后生成文件
+
+   ![image-20240513110229087](C:\Users\aywzc\AppData\Roaming\Typora\typora-user-images\image-20240513110229087.png)
+
+   
 
 
 

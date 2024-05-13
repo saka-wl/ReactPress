@@ -55,13 +55,15 @@ export class RouteService {
    * 生成esm导出类型的路由
    * @returns
    */
-  generateRoutesCode() {
+  generateRoutesCode(ssr: boolean) {
     return `
       import React from 'react';
-      import loadable from '@loadable/component';
+      ${ssr ? '' : 'import loadable from "@loadable/component";'}
       ${this.#routeData
         .map((route, index) => {
-          return `const Route${index} = loadable(() => import('${route.absolutePath}'));`;
+          return ssr
+            ? `import Route${index} from "${route.absolutePath}";`
+            : `const Route${index} = loadable(() => import('${route.absolutePath}'));`;
         })
         .join('\n')}
       export const routes = [

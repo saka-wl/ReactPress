@@ -9,3 +9,6 @@ esm-cjs
 docs
 esm-cjs
 e2e
+.temp
+scripts
+*.d.ts

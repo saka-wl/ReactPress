@@ -1,9 +1,18 @@
 import { Plugin } from 'vite';
 import { RouteService } from './RouteService';
+import { ReactElement } from 'react';
+import { PageModule } from 'shared/types';
 
 interface PluginOption {
   root: string;
   isSSR: boolean;
+}
+
+export interface Route {
+  path: string;
+  element: ReactElement;
+  filePath: string;
+  preload: () => Promise<PageModule>;
 }
 
 export const CONVENTIONAL_ROUTE_ID = 'rpress:routes';

@@ -52,6 +52,7 @@
     "remark-stringify": "10.0.0",
     "rollup": "^4.17.2",
     "shiki": "0.14.3",
+    "sirv": "^2.0.4",
     "unified": "10.1.0",
     "unocss": "^0.60.2",
     "vite": "3.1.4",

@@ -2,6 +2,8 @@ import { Plugin } from 'vite';
 import { SiteConfig } from 'shared/types';
 import { join, relative } from 'path';
 import { PACKET_ROOT } from 'node/constant';
+import sirv from 'sirv';
+// import { existsSync } from 'fs';
 
 const SITE_DATA_ID = 'rpress:site-data';
 
@@ -51,6 +53,10 @@ export function pluginConfig(
           }
         }
       };
+    },
+    configureServer(server) {
+      const publicDir = join(config.root, 'public');
+      server.middlewares.use(sirv(publicDir));
     },
     /**
      * 配置文件热更新，配置文件修改时重新启动服务

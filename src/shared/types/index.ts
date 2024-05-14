@@ -6,18 +6,18 @@ export type NavItemWithLink = {
   link: string;
 };
 
-export interface SiderItem {
+export interface SidebarItem {
   text: string;
   link: string;
 }
 
-export interface SiderBarGroup {
+export interface SidebarGroup {
   text: string;
-  items: SiderItem[];
+  items: SidebarItem[];
 }
 
-export type SiderBar = {
-  [path: string]: SiderBarGroup[];
+export type Sidebar = {
+  [path: string]: SidebarGroup[];
 };
 
 export interface Footer {
@@ -26,7 +26,7 @@ export interface Footer {
 
 export interface ThemeConfig {
   nav: NavItemWithLink[];
-  sideBar?: SiderBar;
+  sidebar?: Sidebar;
   foot?: Footer;
 }
 
@@ -69,7 +69,7 @@ export interface FrontMatter {
   title?: string;
   description?: string;
   pageType?: PageType;
-  siderbar?: boolean;
+  sidebar?: boolean;
   outline?: boolean;
   features?: Feature[];
   hero?: Hero;

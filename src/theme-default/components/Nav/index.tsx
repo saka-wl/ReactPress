@@ -1,6 +1,6 @@
 import { usePageData } from '@runtime';
 import { NavItemWithLink } from 'shared/types';
-import style from './index.module.scss';
+import styles from './index.module.scss';
 import { SwitchAppearance } from '../SwitchAppearance';
 
 function MenuItem(item: NavItemWithLink) {
@@ -16,18 +16,18 @@ export function Nav() {
   const nav = siteData.themeConfig.nav || [];
 
   return (
-    <header w="full">
+    <header fixed="~" pos="t-0 l-0" w="full" z="10">
       <div
         flex="~"
         items="center"
         justify="between"
-        className="px-8 h-14 divider-bottom"
+        className={`h-14 divider-bottom ${styles.nav}`}
       >
         <div>
           <a
             href="/"
             hover="opacity-60"
-            className="w-full h-full text-1rem font-semibold flex items-center"
+            className="w-full h-full text-1rem font-semibold flex items-center px-7"
           >
             Rpress.js
           </a>
@@ -43,8 +43,8 @@ export function Nav() {
           </div>
           {/* 相关链接 */}
           <div
-            className={style.socialLinkIcon}
-            ml="2"
+            className={styles.socialLinkIcon}
+            ml="1"
             before="menu-item-before"
           >
             <a href="/">

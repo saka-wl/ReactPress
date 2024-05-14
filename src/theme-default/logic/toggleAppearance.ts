@@ -30,3 +30,8 @@ export function toggle() {
     localStorage.setItem(APPEARANCE_KEY, 'dark');
   }
 }
+
+export function checkTheTheme() {
+  const userPreference = localStorage.getItem(APPEARANCE_KEY);
+  setClassList(userPreference === 'light' ? false : true);
+}

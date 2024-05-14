@@ -2,6 +2,7 @@ import { createRoot } from 'react-dom/client';
 import { App, initPageData } from './App';
 import { BrowserRouter } from 'react-router-dom';
 import { DataContext } from './hooks';
+import { checkTheTheme } from '../theme-default/logic/toggleAppearance';
 
 async function renderInBrowser() {
   const containerEl = document.getElementById('root');
@@ -9,6 +10,7 @@ async function renderInBrowser() {
     throw new Error('root element not found');
   }
   const pageData = await initPageData(location.pathname);
+  checkTheTheme();
   createRoot(containerEl).render(
     <DataContext.Provider value={pageData}>
       <BrowserRouter>

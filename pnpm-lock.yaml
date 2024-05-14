@@ -86,6 +86,9 @@ importers:
       shiki:
         specifier: 0.14.3
         version: 0.14.3
+      sirv:
+        specifier: ^2.0.4
+        version: 2.0.4
       unified:
         specifier: 10.1.0
         version: 10.1.0

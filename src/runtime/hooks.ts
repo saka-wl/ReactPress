@@ -3,6 +3,6 @@ import { PageData } from 'shared/types';
 
 export const DataContext = createContext({} as PageData);
 
-export const usePageData = () => {
+export const usePageData = (): PageData => {
   return useContext(DataContext);
 };

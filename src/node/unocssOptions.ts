@@ -12,6 +12,17 @@ const options: VitePluginConfig = {
       ([, w]) => ({
         [`border-${w}`]: '1px solid var(--rpress-c-divider-light)'
       })
+    ],
+    [
+      'menu-item-before',
+      {
+        'margin-right': '12px',
+        'margin-left': '12px',
+        width: '1px',
+        height: '24px',
+        'background-color': 'var(--island-c-divider-light)',
+        content: '" "'
+      }
     ]
   ]
 };

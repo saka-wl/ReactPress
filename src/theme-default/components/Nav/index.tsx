@@ -1,6 +1,7 @@
 import { usePageData } from '@runtime';
 import { NavItemWithLink } from 'shared/types';
 import style from './index.module.scss';
+import { SwitchAppearance } from '../SwitchAppearance';
 
 function MenuItem(item: NavItemWithLink) {
   return (
@@ -37,9 +38,15 @@ export function Nav() {
               <MenuItem {...item} key={item.text}></MenuItem>
             ))}
           </div>
-          <div>主题切换按钮</div>
+          <div before="menu-item-before" flex="~">
+            <SwitchAppearance />
+          </div>
           {/* 相关链接 */}
-          <div className={style.socialLinkIcon} ml="2">
+          <div
+            className={style.socialLinkIcon}
+            ml="2"
+            before="menu-item-before"
+          >
             <a href="/">
               <div className="i-carbon-logo-github w-5 h-5 fill-current"></div>
             </a>

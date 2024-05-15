@@ -2,7 +2,7 @@ import { matchRoutes } from 'react-router-dom';
 import { Layout } from '../theme-default';
 import { routes } from 'rpress:routes';
 import { Route } from 'node/plugin-routes';
-import { PageData } from 'shared/types';
+import { PageData, UserConfig } from 'shared/types';
 import siteData from 'rpress:site-data';
 
 export async function initPageData(routePath: string): Promise<PageData> {
@@ -14,10 +14,10 @@ export async function initPageData(routePath: string): Promise<PageData> {
     // console.log(moduleInfo)
     return {
       pageType: moduleInfo.frontmatter?.pageType ?? 'doc',
-      siteData,
-      frontmatter: moduleInfo.frontmatter,
+      siteData: siteData ?? ({} as UserConfig),
+      frontmatter: moduleInfo.frontmatter ?? {},
       pagePath: routePath,
-      toc: moduleInfo?.toc
+      toc: moduleInfo?.toc ?? []
     };
   }
   return {

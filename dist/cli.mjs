@@ -3,7 +3,7 @@ import {
   SERVER_ENTRY_PATH,
   createDevServer,
   createVitePlugins
-} from "./chunk-DVVRPOQ6.mjs";
+} from "./chunk-UJKVNGQA.mjs";
 import {
   resolveConfig
 } from "./chunk-4J7KUVM4.mjs";
@@ -26,7 +26,7 @@ async function renderPage(render, root, clientBundle, routes) {
   await Promise.all(
     routes.map(async (route) => {
       const routePath = route.path;
-      const appHtml = render(routePath);
+      const appHtml = await render(routePath);
       const html = `
 <!DOCTYPE html>
 <html>
@@ -68,7 +68,7 @@ async function bundle(root, config) {
         plugins: await createVitePlugins(config, void 0, isServer),
         ssr: {
           // 注意加上这个配置，防止 cjs 产物中 require ESM 的产物，因为 react-router-dom 的产物为 ESM 格式
-          noExternal: ["react-router-dom"]
+          noExternal: ["react-router-dom", "lodash-es"]
         },
         build: {
           ssr: isServer,

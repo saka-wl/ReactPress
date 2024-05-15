@@ -30,6 +30,18 @@ export function pluginMdxHMR(): Plugin {
         }
         return result;
       }
+    },
+    handleHotUpdate(ctx) {
+      // console.log(ctx.read())
+      if (/\.mdx?/.test(ctx.file)) {
+        ctx.server.ws.send({
+          type: 'custom',
+          event: 'mdx-change',
+          data: {
+            filePath: ctx.file
+          }
+        });
+      }
     }
   };
 }

@@ -18,7 +18,7 @@ const dynamicImport = new Function('m', 'return import(m)');
  * @param clientBundle
  */
 export async function renderPage(
-  render: (pagePath: string) => string,
+  render: (pagePath: string) => Promise<string>,
   root: string,
   clientBundle: RollupOutput,
   routes: RouteObject[]
@@ -30,7 +30,8 @@ export async function renderPage(
   await Promise.all(
     routes.map(async (route) => {
       const routePath = route.path;
-      const appHtml = render(routePath);
+      // console.log(routePath)
+      const appHtml = await render(routePath);
       const html = `
 <!DOCTYPE html>
 <html>
@@ -108,7 +109,7 @@ export async function bundle(root: string, config: SiteConfig) {
         plugins: await createVitePlugins(config, undefined, isServer),
         ssr: {
           // 注意加上这个配置，防止 cjs 产物中 require ESM 的产物，因为 react-router-dom 的产物为 ESM 格式
-          noExternal: ['react-router-dom']
+          noExternal: ['react-router-dom', 'lodash-es']
         },
         build: {
           ssr: isServer,

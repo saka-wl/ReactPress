@@ -1,7 +1,7 @@
-const classList = document.documentElement.classList;
 const APPEARANCE_KEY = 'rpress_appearance';
 
 const setClassList = (isDark = false) => {
+  const classList = document.documentElement.classList;
   if (isDark) {
     classList.add('dark');
   } else {
@@ -22,6 +22,7 @@ if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
  * 深色浅色模式转变
  */
 export function toggle() {
+  const classList = document.documentElement.classList;
   if (classList.contains('dark')) {
     setClassList(false);
     localStorage.setItem(APPEARANCE_KEY, 'light');

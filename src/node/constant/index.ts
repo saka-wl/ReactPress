@@ -38,3 +38,8 @@ export const SERVER_ENTRY_PATH = join(
   'runtime',
   'ssr-entry.tsx'
 );
+
+/**
+ * 路径分隔符
+ */
+export const MASK_SPLITTER = '!!RPRESS!!';

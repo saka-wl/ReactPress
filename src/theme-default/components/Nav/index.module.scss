@@ -22,7 +22,8 @@
 
 .nav {
     padding-left: max(32px,
-            calc(32px + (100vw - var(--island-layout-max-width)) / 2));
+            calc(32px + (100vw - var(--rpress-layout-max-width)) / 2));
     padding-right: max(32px,
-            calc(32px + (100vw - var(--island-layout-max-width)) / 2));
+            calc(32px + (100vw - var(--rpress-layout-max-width)) / 2));
+    background-color: var(--rpress-c-bg);
 }

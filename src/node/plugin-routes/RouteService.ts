@@ -21,17 +21,29 @@ export class RouteService {
     this.#scanDir = scanDir;
   }
   async init() {
+    /**
+     * 快速扫描获取需要转换为路由的文件
+     * files = [
+        'D:/font/mydemo/ReactPress/docs/Counter.tsx',
+        'D:/font/mydemo/ReactPress/docs/guide/a.jsx',
+        'D:/font/mydemo/ReactPress/docs/guide/b.jsx',
+        'D:/font/mydemo/ReactPress/docs/guide/index.jsx',
+        'D:/font/mydemo/ReactPress/docs/index.mdx'
+      ]
+     */
     const files = FastGlob.sync(['**/*.{js,jsx,ts,tsx,md,mdx}'], {
       cwd: this.#scanDir,
       absolute: true,
       ignore: ['**/node_modules/**', '**/build/**', 'config.ts']
     }).sort();
-    // console.log(files);
     files.forEach((file) => {
+      /**
+       * docs + index.mdx ===> D:/font/mydemo/ReactPress/docs/index.mdx
+       */
       const fileRelativePath = normalizePath(
         path.relative(this.#scanDir, file)
       );
-      // 1. 路由路径
+      // 1. 获取路由路径
       const routePath = this.normalizeRoutePath(fileRelativePath);
       // 2. 文件绝对路径
       this.#routeData.push({

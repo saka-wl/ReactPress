@@ -20,7 +20,7 @@ const options: VitePluginConfig = {
         'margin-left': '12px',
         width: '1px',
         height: '24px',
-        'background-color': 'var(--island-c-divider-light)',
+        'background-color': 'var(--rpress-c-divider-light)',
         content: '" "'
       }
     ]
@@ -30,32 +30,32 @@ const options: VitePluginConfig = {
   },
   theme: {
     colors: {
-      brandLight: 'var(--island-c-brand-light)',
-      brandDark: 'var(--island-c-brand-dark)',
-      brand: 'var(--island-c-brand)',
+      brandLight: 'var(--rpress-c-brand-light)',
+      brandDark: 'var(--rpress-c-brand-dark)',
+      brand: 'var(--rpress-c-brand)',
       text: {
-        1: 'var(--island-c-text-1)',
-        2: 'var(--island-c-text-2)',
-        3: 'var(--island-c-text-3)',
-        4: 'var(--island-c-text-4)'
+        1: 'var(--rpress-c-text-1)',
+        2: 'var(--rpress-c-text-2)',
+        3: 'var(--rpress-c-text-3)',
+        4: 'var(--rpress-c-text-4)'
       },
       divider: {
-        default: 'var(--island-c-divider)',
-        light: 'var(--island-c-divider-light)',
-        dark: 'var(--island-c-divider-dark)'
+        default: 'var(--rpress-c-divider)',
+        light: 'var(--rpress-c-divider-light)',
+        dark: 'var(--rpress-c-divider-dark)'
       },
       gray: {
         light: {
-          1: 'var(--island-c-gray-light-1)',
-          2: 'var(--island-c-gray-light-2)',
-          3: 'var(--island-c-gray-light-3)',
-          4: 'var(--island-c-gray-light-4)'
+          1: 'var(--rpress-c-gray-light-1)',
+          2: 'var(--rpress-c-gray-light-2)',
+          3: 'var(--rpress-c-gray-light-3)',
+          4: 'var(--rpress-c-gray-light-4)'
         }
       },
       bg: {
-        default: 'var(--island-c-bg)',
-        soft: 'var(--island-c-bg-soft)',
-        mute: 'var(--island-c-bg-mute)'
+        default: 'var(--rpress-c-bg)',
+        soft: 'var(--rpress-c-bg-soft)',
+        mute: 'var(--rpress-c-bg-mute)'
       }
     }
   }

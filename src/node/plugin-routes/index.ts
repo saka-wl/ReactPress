@@ -17,6 +17,11 @@ export interface Route {
 
 export const CONVENTIONAL_ROUTE_ID = 'rpress:routes';
 
+/**
+ * 将目标文件夹里面的文件递归生成 字符串形式的路由导出文件
+ * @param options
+ * @returns
+ */
 export function pluginRoutes(options: PluginOption): Plugin {
   const routerService = new RouteService(options.root);
   return {
@@ -31,6 +36,17 @@ export function pluginRoutes(options: PluginOption): Plugin {
     },
     load(id) {
       if (id === '\0' + CONVENTIONAL_ROUTE_ID) {
+        /**
+         * 得到：
+         *  import React from 'react';
+            import loadable from "@loadable/component";
+            const Route0 = loadable(() => import('D:/font/mydemo/ReactPress/docs/Counter.tsx'));
+            const Route1 = loadable(() => import('D:/font/mydemo/ReactPress/docs/guide/a.jsx'));
+            export const routes = [
+              { path: '/Counter', element: React.createElement(Route0), preload: () => import('D:/font/mydemo/ReactPress/docs/Counter.tsx') },
+              { path: '/guide/a', element: React.createElement(Route1), preload: () => import('D:/font/mydemo/ReactPress/docs/guide/a.jsx') },
+            ];
+         */
         return routerService.generateRoutesCode(options.isSSR || false);
       }
     }

@@ -15,7 +15,7 @@ export default defineConfig({
         ],
         // 新增 sidebar 的内容
         'sidebar': {
-            '/guide/': [
+            '/guide': [
                 {
                     text: '教程',
                     items: [
@@ -26,6 +26,10 @@ export default defineConfig({
                         {
                             text: '如何安装',
                             link: '/guide/b'
+                        },
+                        {
+                            text: "注意事项",
+                            link: "/guide/c"
                         }
                     ]
                 }

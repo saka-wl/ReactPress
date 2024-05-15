@@ -1,0 +1,406 @@
+
+/**
+ * Headings
+ * -------------------------------------------------------------------------- */
+
+ .rpress-doc h1,
+ .rpress-doc h2,
+ .rpress-doc h3,
+ .rpress-doc h4,
+ .rpress-doc h5,
+ .rpress-doc h6 {
+   position: relative;
+   font-weight: 600;
+   outline: none;
+ }
+ 
+ .rpress-doc h1 {
+   letter-spacing: -0.02em;
+   line-height: 40px;
+   font-size: 28px;
+   margin-bottom: 40px;
+ }
+ 
+ .rpress-doc h2 {
+   margin: 48px 0 16px;
+   /* padding-top: 24px; */
+   letter-spacing: -0.02em;
+   line-height: 32px;
+   font-size: 24px;
+ }
+ 
+ .rpress-doc h3 {
+   margin: 32px 0 0;
+   letter-spacing: -0.01em;
+   line-height: 28px;
+   font-size: 20px;
+ }
+ 
+ .rpress-doc .header-anchor {
+   float: left;
+   margin-left: -0.87em;
+   padding-right: 0.23em;
+   font-weight: 500;
+   opacity: 0;
+   transition: color 0.25s, opacity 0.25s;
+ }
+ 
+ .rpress-doc h1:hover .header-anchor,
+ .rpress-doc h1 .header-anchor:focus,
+ .rpress-doc h2:hover .header-anchor,
+ .rpress-doc h2 .header-anchor:focus,
+ .rpress-doc h3:hover .header-anchor,
+ .rpress-doc h3 .header-anchor:focus,
+ .rpress-doc h4:hover .header-anchor,
+ .rpress-doc h4 .header-anchor:focus,
+ .rpress-doc h5:hover .header-anchor,
+ .rpress-doc h5 .header-anchor:focus,
+ .rpress-doc h6:hover .header-anchor,
+ .rpress-doc h6 .header-anchor:focus {
+   opacity: 1;
+ }
+ 
+ @media (min-width: 768px) {
+   .rpress-doc h1 {
+     letter-spacing: -0.02em;
+     line-height: 40px;
+     font-size: 32px;
+   }
+ }
+ 
+ /**
+    * Paragraph and inline elements
+    * -------------------------------------------------------------------------- */
+ 
+ .rpress-doc p,
+ .rpress-doc summary {
+   margin: 16px 0;
+ }
+ 
+ .rpress-doc p {
+   z-index: 2;
+   line-height: 28px;
+ }
+ 
+ .rpress-doc blockquote {
+   margin: 16px 0;
+   border-left: 2px solid var(--rpress-c-divider);
+   padding-left: 16px;
+   transition: border-color 0.5s;
+ }
+ 
+ .rpress-doc blockquote > p {
+   margin: 0;
+   font-size: 16px;
+   color: var(--rpress-c-text-2);
+   transition: color 0.5s;
+ }
+ 
+ .rpress-doc a {
+   font-weight: 500;
+   color: var(--rpress-c-brand);
+   text-decoration-style: dotted;
+   transition: color 0.25s;
+ }
+ 
+ .rpress-doc a:hover {
+   color: var(--rpress-c-brand-dark);
+ }
+ 
+ .rpress-doc strong {
+   font-weight: 600;
+ }
+ 
+ /**
+    * Lists
+    * -------------------------------------------------------------------------- */
+ 
+ .rpress-doc ul,
+ .rpress-doc ol {
+   padding-left: 1.25rem;
+   margin: 16px 0;
+ }
+ 
+ .rpress-doc ul {
+   list-style: disc;
+ }
+ 
+ .rpress-doc ol {
+   list-style: decimal;
+ }
+ 
+ .rpress-doc li + li {
+   margin-top: 8px;
+ }
+ 
+ .rpress-doc li > ol,
+ .rpress-doc li > ul {
+   margin: 8px 0 0;
+ }
+ 
+ /**
+    * Table
+    * -------------------------------------------------------------------------- */
+ 
+ .rpress-doc table {
+   display: block;
+   border-collapse: collapse;
+   margin: 20px 0;
+   overflow-x: auto;
+ }
+ 
+ .rpress-doc tr {
+   border-top: 1px solid var(--rpress-c-divider);
+   transition: background-color 0.5s;
+ }
+ 
+ .rpress-doc tr:nth-child(2n) {
+   background-color: var(--rpress-c-bg-soft);
+ }
+ 
+ .rpress-doc th,
+ .rpress-doc td {
+   border: 1px solid var(--rpress-c-divider);
+   padding: 12px 16px;
+ }
+ 
+ .rpress-doc th {
+   font-size: 16px;
+   font-weight: 600;
+   background-color: var(--rpress-c-white-soft);
+ }
+ 
+ .dark .rpress-doc th {
+   background-color: var(--rpress-c-black);
+ }
+ 
+ /**
+    * Decorational elements
+    * -------------------------------------------------------------------------- */
+ 
+ .rpress-doc hr {
+   margin: 16px 0;
+   border: none;
+   border-top: 1px solid var(--rpress-c-divider-light);
+ }
+ 
+ /**
+    * Custom Block
+    * -------------------------------------------------------------------------- */
+ 
+ .rpress-doc .custom-block {
+   margin: 16px 0;
+ }
+ 
+ .rpress-doc .custom-block p {
+   margin: 8px 0;
+   line-height: 24px;
+ }
+ 
+ .rpress-doc .custom-block p:first-child {
+   margin: 0;
+ }
+ 
+ .rpress-doc .custom-block a {
+   color: inherit;
+   font-weight: 600;
+   text-decoration: underline;
+   transition: opacity 0.25s;
+ }
+ 
+ .rpress-doc .custom-block a:hover {
+   opacity: 0.6;
+ }
+ 
+ .rpress-doc .custom-block code {
+   font-size: var(--rpress-custom-block-code-font-size);
+   font-weight: 700;
+   color: inherit;
+ }
+ 
+ .rpress-doc .custom-block div[class*='language-'] {
+   margin: 8px 0;
+ }
+ 
+ .rpress-doc .custom-block div[class*='language-'] code {
+   font-weight: 400;
+   background-color: transparent;
+ }
+ 
+ /**
+    * Code
+    * -------------------------------------------------------------------------- */
+ 
+ /* inline code */
+ .rpress-doc :not(pre, h1, h2, h3, h4, h5, h6) > code {
+   font-size: var(--rpress-code-font-size);
+ }
+ 
+ .rpress-doc :not(pre, div) > code {
+   border-radius: 4px;
+   padding: 3px 6px;
+   color: var(--rpress-c-text-code);
+   background-color: var(--rpress-c-bg-mute);
+   transition: color 0.5s, background-color 0.5s;
+ }
+ 
+ .rpress-doc h1 > code,
+ .rpress-doc h2 > code,
+ .rpress-doc h3 > code {
+   font-size: 0.9em;
+ }
+ 
+ .rpress-doc a > code {
+   color: var(--rpress-c-brand);
+   transition: color 0.25s;
+ }
+ 
+ .rpress-doc a:hover > code {
+   color: var(--rpress-c-brand-dark);
+ }
+ 
+ .rpress-doc div[class*='language-'] {
+   position: relative;
+   margin: 16px -24px;
+   background-color: var(--rpress-code-block-bg);
+   overflow-x: auto;
+   transition: background-color 0.5s;
+ }
+ 
+ @media (min-width: 640px) {
+   .rpress-doc div[class*='language-'] {
+     border-radius: 8px;
+     margin: 16px 0;
+   }
+ }
+ 
+ @media (max-width: 639px) {
+   .rpress-doc li div[class*='language-'] {
+     border-radius: 8px 0 0 8px;
+   }
+ }
+ 
+ .rpress-doc div[class*='language-'] + div[class*='language-'],
+ .rpress-doc div[class$='-api'] + div[class*='language-'],
+ .rpress-doc
+   div[class*='language-']
+   + div[class$='-api']
+   > div[class*='language-'] {
+   margin-top: -8px;
+ }
+ 
+ .rpress-doc [class*='language-'] pre,
+ .rpress-doc [class*='language-'] code {
+   text-align: left;
+   white-space: pre;
+   word-spacing: normal;
+   word-break: normal;
+   word-wrap: normal;
+   -moz-tab-size: 4;
+   -o-tab-size: 4;
+   tab-size: 4;
+   -webkit-hyphens: none;
+   -moz-hyphens: none;
+   -ms-hyphens: none;
+   hyphens: none;
+ }
+ 
+ .rpress-doc [class*='language-'] pre {
+   position: relative;
+   z-index: 1;
+   margin: 0;
+   padding: 16px 0;
+   background: transparent;
+   overflow-x: auto;
+ }
+ 
+ .rpress-doc [class*='language-'] code {
+   display: block;
+   padding: 0 24px;
+   width: fit-content;
+   min-width: 100%;
+   line-height: var(--rpress-code-line-height);
+   font-size: var(--rpress-code-font-size);
+   color: var(--rpress-code-block-color);
+   transition: color 0.5s;
+ }
+ 
+ .rpress-doc [class*='language-'] code .highlighted {
+   background-color: var(--rpress-code-line-highlight-color);
+   transition: background-color 0.5s;
+   margin: 0 -24px;
+   padding: 0 24px;
+   width: calc(100% + 2 * 24px);
+   display: inline-block;
+ }
+ 
+ .rpress-doc [class*='language-'] > button.copy {
+   position: absolute;
+   top: 8px;
+   right: 8px;
+   z-index: 3;
+   display: block;
+   justify-content: center;
+   align-items: center;
+   border-radius: 4px;
+   width: 40px;
+   height: 40px;
+   background-color: var(--rpress-code-block-bg);
+   opacity: 0;
+   cursor: pointer;
+   background-image: var(--rpress-icon-copy);
+   background-position: 50%;
+   background-size: 20px;
+   background-repeat: no-repeat;
+   transition: opacity 0.4s;
+ }
+ 
+ .rpress-doc [class*='language-']:hover > button.copy,
+ .rpress-doc [class*='language-'] > button.copy:focus {
+   opacity: 1;
+ }
+ 
+ .rpress-doc [class*='language-'] > button.copy:hover {
+   background-color: var(--rpress-code-copy-code-hover-bg);
+ }
+ 
+ .rpress-doc [class*='language-'] > button.copy.copied,
+ .rpress-doc [class*='language-'] > button.copy:hover.copied {
+   border-radius: 0 4px 4px 0;
+   background-color: var(--rpress-code-copy-code-hover-bg);
+   background-image: var(--rpress-icon-copied);
+ }
+ 
+ .rpress-doc [class*='language-'] > button.copy.copied::before,
+ .rpress-doc [class*='language-'] > button.copy:hover.copied::before {
+   position: relative;
+   left: -65px;
+   display: block;
+   border-radius: 4px 0 0 4px;
+   padding-top: 8px;
+   width: 64px;
+   height: 40px;
+   text-align: center;
+   font-size: 12px;
+   font-weight: 500;
+   color: var(--rpress-code-copy-code-active-text);
+   background-color: var(--rpress-code-copy-code-hover-bg);
+   white-space: nowrap;
+   content: 'Copied';
+ }
+ 
+ .rpress-doc [class*='language-'] > span.lang {
+   position: absolute;
+   top: 6px;
+   right: 12px;
+   z-index: 2;
+   font-size: 12px;
+   font-weight: 500;
+   color: var(--rpress-c-text-dark-3);
+   transition: color 0.4s, opacity 0.4s;
+ }
+ 
+ .rpress-doc [class*='language-']:hover > button.copy + span.lang,
+ .rpress-doc [class*='language-'] > button.copy:focus + span.lang {
+   opacity: 0;
+ }

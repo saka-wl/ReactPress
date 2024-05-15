@@ -112,6 +112,11 @@
     --rpress-c-brand-dark: var(--rpress-c-green-dark);
     --rpress-c-brand-darker: var(--rpress-c-green-darker);
   }
+
+  :root {
+    --rpress-sidebar-width: 272px;
+    --rpress-aside-width: 268px;
+  }
   
   .dark {
     --rpress-c-bg: var(--rpress-c-black-soft);

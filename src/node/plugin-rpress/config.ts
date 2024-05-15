@@ -54,6 +54,7 @@ export function pluginConfig(
         }
       };
     },
+    // 配置获取图片等写在doc里面的资源
     configureServer(server) {
       const publicDir = join(config.root, 'public');
       server.middlewares.use(sirv(publicDir));

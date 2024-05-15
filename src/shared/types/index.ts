@@ -4,6 +4,7 @@ import { ComponentType } from 'react';
 export type NavItemWithLink = {
   text: string;
   link: string;
+  key?: string;
 };
 
 export interface SidebarItem {
@@ -92,5 +93,6 @@ export interface PageData {
 export interface PageModule {
   default: ComponentType;
   frontmatter?: FrontMatter;
+  toc?: Header[];
   [key: string]: unknown;
 }

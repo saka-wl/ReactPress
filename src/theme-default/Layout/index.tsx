@@ -1,8 +1,9 @@
-import { Content } from '@runtime';
+// import { Content } from '@runtime';
 import 'uno.css';
 import { usePageData } from '../../runtime';
 import '../style/base.css';
 import '../style/vars.css';
+import '../style/doc.css';
 import { Nav } from '../components/Nav';
 import { HomeLayout } from './HomeLayout';
 import { DocLayout } from './DocLayout';
@@ -25,7 +26,13 @@ export function Layout() {
   return (
     <>
       <Nav />
-      <div>{getContent()}</div>
+      <section
+        style={{
+          paddingTop: 'var(--rpress-nav-height)'
+        }}
+      >
+        {getContent()}
+      </section>
     </>
   );
 }

@@ -1,5 +1,5 @@
 import { Feature } from 'shared/types';
-import styles from './index.module.scss';
+// import styles from './index.module.scss';
 
 function getFeatureWidth(len) {
   if (len % 4 === 0) return 4;
@@ -27,12 +27,12 @@ export function HomeFeature(props: { features: Feature[] }) {
             <article
               bg="bg-soft"
               border="~ bg-soft none rounded-xl"
-              className={styles.article}
               p="6"
               h="full"
             >
+              {/* bg-white   gray-light-1  */}
               <div
-                bg="gray-light-4 dark:bg-white"
+                bg="gray-light-4 dark:brandDark"
                 border="rounded-md"
                 className="mb-5 w-12 h-12 text-3xl flex-center"
               >

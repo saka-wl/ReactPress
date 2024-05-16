@@ -29,7 +29,7 @@ export function DocLayout() {
           <DocFooter />
         </div>
         <div className={styles.asideContainer}>
-          <Aside headers={toc} />
+          <Aside headers={toc} __rpress />
         </div>
       </div>
     </div>

@@ -3,7 +3,7 @@ import {
   SERVER_ENTRY_PATH,
   createDevServer,
   createVitePlugins
-} from "./chunk-UJKVNGQA.mjs";
+} from "./chunk-QBDMFMCF.mjs";
 import {
   resolveConfig
 } from "./chunk-4J7KUVM4.mjs";
@@ -46,7 +46,6 @@ async function renderPage(render, root, clientBundle, routes) {
       await fs.writeFile(join(root, "build", fileName), html);
     })
   );
-  await fs.remove(join(root, ".temp"));
   console.log("Rendering page finished");
 }
 async function build(root = process.cwd(), config) {

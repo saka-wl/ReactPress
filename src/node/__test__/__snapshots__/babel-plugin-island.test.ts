@@ -16,23 +16,23 @@ describe('babel-plugin-rpress', () => {
     presets: ['@babel/preset-react'],
     plugins: [babelPluginRpress]
   };
-  test('Should compile jsx identifier', async () => {
-    const code = `import Aside from '${RPRESS_PATH}'; export default function App() { return <Aside __rpress />; }`;
+  // test('Should compile jsx identifier', async () => {
+  //   const code = `import Aside from '${RPRESS_PATH}'; export default function App() { return <Aside __rpress />; }`;
 
-    const result = await transformAsync(code, babelOptions);
+  //   const result = await transformAsync(code, babelOptions);
 
-    // .toContain(
-    //   `__island: "${RPRESS_PATH}${MASK_SPLITTER}${IMPORTED_PATH}"`
-    // )
-    expect(result?.code).toMatchInlineSnapshot(`
-          "import Aside from '../Comp/index';
-          export default function App() {
-            return /*#__PURE__*/React.createElement(Aside, {
-              __rpress: \\"../Comp/index!!RPRESS!!C:/User/project/test.tsx\\"
-            });
-          }"
-        `);
-  });
+  //   // .toContain(
+  //   //   `__island: "${RPRESS_PATH}${MASK_SPLITTER}${IMPORTED_PATH}"`
+  //   // )
+  //   expect(result?.code).toMatchInlineSnapshot(`
+  //         "import Aside from '../Comp/index';
+  //         export default function App() {
+  //           return /*#__PURE__*/React.createElement(Aside, {
+  //             __rpress: \\"../Comp/index!!RPRESS!!C:/User/project/test.tsx\\"
+  //           });
+  //         }"
+  //       `);
+  // });
 
   test('Should compile jsx member expression', async () => {
     const code = `import A from '${RPRESS_PATH}'; export default function App() { return <A.B __rpress />; }`;

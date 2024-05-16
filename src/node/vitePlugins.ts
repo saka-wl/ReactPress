@@ -9,6 +9,9 @@ import { pluginRoutes } from './plugin-routes';
 import { createMdxPlugins } from './plugin-mdx';
 import pluginUnocss from 'unocss/vite';
 import unocssOptions from './unocssOptions';
+import path from 'path';
+import { PACKET_ROOT } from './constant';
+import babelPluginRpress from './babel-plugin-rpress';
 
 export async function createVitePlugins(
   config: SiteConfig,
@@ -19,7 +22,13 @@ export async function createVitePlugins(
     pluginUnocss(unocssOptions),
     pluginIndexHtml(),
     pluginReact({
-      jsxRuntime: 'automatic'
+      jsxRuntime: 'automatic',
+      jsxImportSource: isSSR
+        ? path.join(PACKET_ROOT, 'src', 'runtime')
+        : 'react',
+      babel: {
+        plugins: [babelPluginRpress]
+      }
     }),
     pluginConfig(config, restart),
     pluginRoutes({

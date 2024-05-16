@@ -1,4 +1,4 @@
-import { Header } from 'shared/types';
+import { Header, PropsWithRpress } from 'shared/types';
 import { useRef, useEffect } from 'react';
 import { bindingAsideScroll, scrollToTarget } from '../../logic/asideScroll';
 import { useHeaders } from '../../logic/useHeaders';
@@ -7,7 +7,7 @@ interface AsideProps {
   headers: Header[];
 }
 
-export function Aside(props: AsideProps) {
+export function Aside(props: AsideProps & PropsWithRpress) {
   const { headers: rawHeaders = [] } = props;
   const headers = useHeaders(rawHeaders);
   const hasOutline = headers.length > 0;

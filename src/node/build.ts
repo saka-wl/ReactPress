@@ -1,14 +1,85 @@
 import { InlineConfig, Plugin, build as viteBuild } from 'vite';
-import { CLIENT_ENTRY_PATH, SERVER_ENTRY_PATH } from './constant';
-import { dirname, join } from 'path';
+import {
+  CLIENT_ENTRY_PATH,
+  MASK_SPLITTER,
+  SERVER_ENTRY_PATH
+} from './constant';
+import path, { dirname, join } from 'path';
 import type { RollupOutput } from 'rollup';
 import fs from 'fs-extra';
 import { pathToFileURL } from 'url';
 import { SiteConfig } from 'shared/types';
 import { createVitePlugins } from './vitePlugins';
 import type { RouteObject } from 'react-router-dom';
+import { RenderResult } from '../runtime/ssr-entry';
 
 const dynamicImport = new Function('m', 'return import(m)');
+
+async function buildRpress(
+  root: string,
+  rpressProps: unknown[],
+  rpressToPathMap: Record<string, string>
+) {
+  // { Aside: 'xxx' }
+  // -> import { Aside } from 'xxx'
+  // window.RPRESS = { Aside }
+  // window.RPRESS_PROPS =
+  // JSON.parse(document.querySelector('#rpress-props').textContent)
+  const rpressInjectCode = `
+  ${Object.entries(rpressToPathMap)
+    .map(([rpressName, rpressPath]) => {
+      return `
+      import { ${rpressName} } from '${rpressPath}';
+      `;
+    })
+    .join('')}
+  window.RPRESS = { ${Object.keys(rpressToPathMap).join(', ')} };
+  window.RPRESS_PROPS = JSON.parse(
+    document.getElementById('rpress-props').textContent
+  );
+  `;
+  const injectId = 'rpress:inject';
+  return viteBuild({
+    mode: 'production',
+    build: {
+      // 输出目录
+      outDir: path.join(root, '.temp'),
+      rollupOptions: {
+        input: injectId
+      }
+    },
+    plugins: [
+      // 重点插件，用来加载我们拼接的 rpress 注册模块的代码
+      {
+        name: 'rpress:inject',
+        enforce: 'post',
+        resolveId(id) {
+          if (id.includes(MASK_SPLITTER)) {
+            const [originId, importer] = id.split(MASK_SPLITTER);
+            return this.resolve(originId, importer, { skipSelf: true });
+          }
+
+          if (id === injectId) {
+            return id;
+          }
+        },
+        load(id) {
+          if (id === injectId) {
+            return rpressInjectCode;
+          }
+        },
+        // 对于 rpress Bundle，我们只需要 JS 即可，其它资源文件可以删除
+        generateBundle(_, bundle) {
+          for (const name in bundle) {
+            if (bundle[name].type === 'asset') {
+              delete bundle[name];
+            }
+          }
+        }
+      }
+    ]
+  });
+}
 
 /**
  * 渲染出index.html
@@ -18,7 +89,7 @@ const dynamicImport = new Function('m', 'return import(m)');
  * @param clientBundle
  */
 export async function renderPage(
-  render: (pagePath: string) => Promise<string>,
+  render: (pagePath: string) => Promise<RenderResult>,
   root: string,
   clientBundle: RollupOutput,
   routes: RouteObject[]
@@ -31,7 +102,8 @@ export async function renderPage(
     routes.map(async (route) => {
       const routePath = route.path;
       // console.log(routePath)
-      const appHtml = await render(routePath);
+      const { appHtml, rpressProps, rpressToPathMap } = await render(routePath);
+      await buildRpress(root, rpressProps, rpressToPathMap);
       const html = `
 <!DOCTYPE html>
 <html>

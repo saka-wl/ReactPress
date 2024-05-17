@@ -2,22 +2,31 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
 </head>
 
 <body>
-    <pre>
-        <code class="language-js">console.log(123);</code>
-    </pre>
+  <div id="root"></div>
+  <script type="importmap">
+  {
+    "imports": {
+      "react": "https://esm.sh/stable/react@18.2.0/es2022/react.js",
+      "react-dom/client": "https://esm.sh/stable/react-dom@18.2.0/es2022/client.js"
+    }
+  }
+  </script>
 
-    <div class="language-js">
-        <span class="lang">js</span>
-        <pre>
-            <code class="">console.log(123);</code>
-        </pre>
-    </div>
+  <script type="module">
+    import React from 'react';
+    import { createRoot } from 'react-dom/client';
+    const container = document.getElementById('root');
+    createRoot(container).render(
+      React.createElement('h1', null, 'Hello World!')
+    );
+  </script>
 </body>
 
 </html>

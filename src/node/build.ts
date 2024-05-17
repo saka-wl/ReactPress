@@ -1,7 +1,9 @@
 import { InlineConfig, build as viteBuild } from 'vite';
 import {
   CLIENT_ENTRY_PATH,
+  EXTERNALS,
   MASK_SPLITTER,
+  PACKET_ROOT,
   SERVER_ENTRY_PATH
 } from './constant';
 import path, { dirname, join } from 'path';
@@ -42,11 +44,15 @@ async function buildRpress(
   const injectId = 'rpress:inject';
   return viteBuild({
     mode: 'production',
+    esbuild: {
+      jsx: 'automatic'
+    },
     build: {
       // 输出目录
       outDir: path.join(root, '.temp'),
       rollupOptions: {
-        input: injectId
+        input: injectId,
+        external: EXTERNALS
       }
     },
     plugins: [
@@ -119,6 +125,8 @@ export async function renderPage(
       const rpressBundle = await buildRpress(root, rpressToPathMap);
       const rpressCode = (rpressBundle as RollupOutput).output[0].code;
       // console.log(rpressCode)
+      const normalizeVendorFilename = (fileName: string) =>
+        fileName.replace(/\//g, '_') + '.js';
       const html = `
 <!DOCTYPE html>
 <html>
@@ -130,6 +138,15 @@ export async function renderPage(
     ${styleAssets
       .map((item) => `<link rel="stylesheet" href="/${item.fileName}">`)
       .join('\n')}
+      <script type="importmap">
+        {
+          "imports": {
+            ${EXTERNALS.map(
+              (name) => `"${name}": "/${normalizeVendorFilename(name)}"`
+            ).join(',')}
+          }
+        }
+      </script>
   </head>
   <body>
     <div id="root">${appHtml}</div>
@@ -212,7 +229,8 @@ export async function bundle(root: string, config: SiteConfig) {
             input: isServer ? SERVER_ENTRY_PATH : CLIENT_ENTRY_PATH,
             output: {
               format: isServer ? 'cjs' : 'esm'
-            }
+            },
+            external: EXTERNALS
           }
         }
       };
@@ -234,6 +252,7 @@ export async function bundle(root: string, config: SiteConfig) {
     if (fs.pathExistsSync(publicDir)) {
       await fs.copy(publicDir, join(root, CLIENT_OUTPUT));
     }
+    await fs.copy(join(PACKET_ROOT, 'vendors'), join(root, CLIENT_OUTPUT));
     spanner.stop();
 
     return [clientBundle, serverBundle] as [RollupOutput, RollupOutput];

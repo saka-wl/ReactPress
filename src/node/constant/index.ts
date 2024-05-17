@@ -43,3 +43,13 @@ export const SERVER_ENTRY_PATH = join(
  * 路径分隔符
  */
 export const MASK_SPLITTER = '!!RPRESS!!';
+
+/**
+ * 排除的依赖
+ */
+export const EXTERNALS = [
+  'react',
+  'react-dom',
+  'react-dom/client',
+  'react/jsx-runtime'
+];

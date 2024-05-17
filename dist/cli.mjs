@@ -1,10 +1,12 @@
 import {
   CLIENT_ENTRY_PATH,
+  EXTERNALS,
   MASK_SPLITTER,
+  PACKET_ROOT,
   SERVER_ENTRY_PATH,
   createDevServer,
   createVitePlugins
-} from "./chunk-ARYWPZXB.mjs";
+} from "./chunk-36LMFSO2.mjs";
 import {
   resolveConfig
 } from "./chunk-4J7KUVM4.mjs";
@@ -19,15 +21,14 @@ import path, { dirname, join } from "path";
 import fs from "fs-extra";
 import { pathToFileURL } from "url";
 var dynamicImport = new Function("m", "return import(m)");
-async function buildRpress(root, rpressProps, rpressToPathMap) {
+var CLIENT_OUTPUT = "build";
+async function buildRpress(root, rpressToPathMap) {
   const rpressInjectCode = `
-  ${Object.entries(rpressToPathMap).map(
-    ([rpressName, rpressPath]) => {
-      return `
+  ${Object.entries(rpressToPathMap).map(([rpressName, rpressPath]) => {
+    return `
       import { ${rpressName} } from '${rpressPath}';
       `;
-    }
-  ).join("")}
+  }).join("")}
   window.RPRESS = { ${Object.keys(rpressToPathMap).join(", ")} };
   window.RPRESS_PROPS = JSON.parse(
     document.getElementById('rpress-props').textContent
@@ -36,11 +37,15 @@ async function buildRpress(root, rpressProps, rpressToPathMap) {
   const injectId = "rpress:inject";
   return viteBuild({
     mode: "production",
+    esbuild: {
+      jsx: "automatic"
+    },
     build: {
       // 输出目录
       outDir: path.join(root, ".temp"),
       rollupOptions: {
-        input: injectId
+        input: injectId,
+        external: EXTERNALS
       }
     },
     plugins: [
@@ -48,6 +53,7 @@ async function buildRpress(root, rpressProps, rpressToPathMap) {
       {
         name: "rpress:inject",
         enforce: "post",
+        // rpress:inject../../components/Aside/index!!RPRESS!!D:/font/mydemo/ReactPress/src/theme-default/Layout/DocLayout/index.tsx
         resolveId(id) {
           if (id.includes(MASK_SPLITTER)) {
             const [originId, importer] = id.split(MASK_SPLITTER);
@@ -82,8 +88,18 @@ async function renderPage(render, root, clientBundle, routes) {
   await Promise.all(
     routes.map(async (route) => {
       const routePath = route.path;
-      const { appHtml, rpressProps, rpressToPathMap } = await render(routePath);
-      await buildRpress(root, rpressProps, rpressToPathMap);
+      console.log(routePath);
+      const {
+        appHtml,
+        rpressProps = [],
+        rpressToPathMap
+      } = await render(routePath);
+      const styleAssets = clientBundle.output.filter(
+        (chunk) => chunk.type === "asset" && chunk.fileName.endsWith(".css")
+      );
+      const rpressBundle = await buildRpress(root, rpressToPathMap);
+      const rpressCode = rpressBundle.output[0].code;
+      const normalizeVendorFilename = (fileName2) => fileName2.replace(/\//g, "_") + ".js";
       const html = `
 <!DOCTYPE html>
 <html>
@@ -92,17 +108,30 @@ async function renderPage(render, root, clientBundle, routes) {
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <title>title</title>
     <meta name="description" content="xxx">
+    ${styleAssets.map((item) => `<link rel="stylesheet" href="/${item.fileName}">`).join("\n")}
+      <script type="importmap">
+        {
+          "imports": {
+            ${EXTERNALS.map(
+        (name) => `"${name}": "/${normalizeVendorFilename(name)}"`
+      ).join(",")}
+          }
+        }
+      </script>
   </head>
   <body>
     <div id="root">${appHtml}</div>
+    <script type="module">${rpressCode}</script>
     <script type="module" src="/${clientChunk?.fileName}"></script>
+    <script id="rpress-props">${JSON.stringify(rpressProps)}</script>
   </body>
 </html>`.trim();
       const fileName = routePath.endsWith("/") ? `${routePath}index.html` : `${routePath}.html`;
-      await fs.ensureDir(join(root, "build", dirname(fileName)));
-      await fs.writeFile(join(root, "build", fileName), html);
+      await fs.ensureDir(join(root, CLIENT_OUTPUT, dirname(fileName)));
+      await fs.writeFile(join(root, CLIENT_OUTPUT, fileName), html);
     })
   );
+  await fs.remove(join(root, ".temp"));
   console.log("Rendering page finished");
 }
 async function build(root = process.cwd(), config) {
@@ -129,12 +158,13 @@ async function bundle(root, config) {
         build: {
           ssr: isServer,
           // 输出产物目录
-          outDir: isServer ? join(root, ".temp") : join(root, "build"),
+          outDir: isServer ? join(root, ".temp") : join(root, CLIENT_OUTPUT),
           rollupOptions: {
             input: isServer ? SERVER_ENTRY_PATH : CLIENT_ENTRY_PATH,
             output: {
               format: isServer ? "cjs" : "esm"
-            }
+            },
+            external: EXTERNALS
           }
         }
       };
@@ -151,6 +181,11 @@ async function bundle(root, config) {
       clientBuild(),
       serverBuild()
     ]);
+    const publicDir = join(root, "public");
+    if (fs.pathExistsSync(publicDir)) {
+      await fs.copy(publicDir, join(root, CLIENT_OUTPUT));
+    }
+    await fs.copy(join(PACKET_ROOT, "vendors"), join(root, CLIENT_OUTPUT));
     spanner.stop();
     return [clientBundle, serverBundle];
   } catch (err) {

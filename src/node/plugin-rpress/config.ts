@@ -8,7 +8,7 @@ import sirv from 'sirv';
 const SITE_DATA_ID = 'rpress:site-data';
 
 /**
- * 注册模块
+ * 用户配置插件
  * @param config
  * @returns
  */

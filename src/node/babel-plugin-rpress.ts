@@ -1,12 +1,15 @@
 import { declare } from '@babel/helper-plugin-utils';
 import type { Visitor } from '@babel/traverse';
 import type { PluginPass, JSXElement, JSXAttribute } from '@babel/core';
-import { types as T } from '@babel/core';
+// import { types as T } from '@babel/core';
 import { MASK_SPLITTER } from './constant';
 import { normalizePath } from 'vite';
 
 const dynamicImport = new Function('m', 'return import(m)');
 
+/**
+ * 将 __rpress 属性转换为 带路径的格式
+ */
 export default declare(async (api) => {
   const { default: babel } = await dynamicImport('@babel/core');
   const T = babel.types;

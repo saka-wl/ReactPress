@@ -2,6 +2,7 @@ import { SiteConfig } from 'shared/types';
 import { pluginIndexHtml } from './plugin-rpress/indexHtml';
 /**
  * pluginReact 为局部热更新
+ * https://www.npmjs.com/package/@vitejs/plugin-react
  */
 import pluginReact from '@vitejs/plugin-react';
 import { pluginConfig } from './plugin-rpress/config';
@@ -23,6 +24,7 @@ export async function createVitePlugins(
     pluginIndexHtml(),
     pluginReact({
       jsxRuntime: 'automatic',
+      // 控制jsx的导入位置
       jsxImportSource: isSSR
         ? path.join(PACKET_ROOT, 'src', 'runtime')
         : 'react',

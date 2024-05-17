@@ -1,4 +1,4 @@
-import { InlineConfig, Plugin, build as viteBuild } from 'vite';
+import { InlineConfig, build as viteBuild } from 'vite';
 import {
   CLIENT_ENTRY_PATH,
   MASK_SPLITTER,
@@ -15,9 +15,10 @@ import { RenderResult } from '../runtime/ssr-entry';
 
 const dynamicImport = new Function('m', 'return import(m)');
 
+const CLIENT_OUTPUT = 'build';
+
 async function buildRpress(
   root: string,
-  rpressProps: unknown[],
   rpressToPathMap: Record<string, string>
 ) {
   // { Aside: 'xxx' }
@@ -53,6 +54,7 @@ async function buildRpress(
       {
         name: 'rpress:inject',
         enforce: 'post',
+        // rpress:inject../../components/Aside/index!!RPRESS!!D:/font/mydemo/ReactPress/src/theme-default/Layout/DocLayout/index.tsx
         resolveId(id) {
           if (id.includes(MASK_SPLITTER)) {
             const [originId, importer] = id.split(MASK_SPLITTER);
@@ -95,15 +97,28 @@ export async function renderPage(
   routes: RouteObject[]
 ) {
   console.log('Rendering page in server side...');
+  // clientBundle中是一些依赖包和逻辑的打包结果
   const clientChunk = clientBundle.output.find(
     (chunk) => chunk.type === 'chunk' && chunk.isEntry
   );
+  // console.log(clientChunk)
+  // console.log(routes)
   await Promise.all(
     routes.map(async (route) => {
       const routePath = route.path;
-      // console.log(routePath)
-      const { appHtml, rpressProps, rpressToPathMap } = await render(routePath);
-      await buildRpress(root, rpressProps, rpressToPathMap);
+      console.log(routePath);
+      // 在node服务器中生成相应的html等文件
+      const {
+        appHtml,
+        rpressProps = [],
+        rpressToPathMap
+      } = await render(routePath);
+      const styleAssets = clientBundle.output.filter(
+        (chunk) => chunk.type === 'asset' && chunk.fileName.endsWith('.css')
+      );
+      const rpressBundle = await buildRpress(root, rpressToPathMap);
+      const rpressCode = (rpressBundle as RollupOutput).output[0].code;
+      // console.log(rpressCode)
       const html = `
 <!DOCTYPE html>
 <html>
@@ -112,48 +127,54 @@ export async function renderPage(
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <title>title</title>
     <meta name="description" content="xxx">
+    ${styleAssets
+      .map((item) => `<link rel="stylesheet" href="/${item.fileName}">`)
+      .join('\n')}
   </head>
   <body>
     <div id="root">${appHtml}</div>
+    <script type="module">${rpressCode}</script>
     <script type="module" src="/${clientChunk?.fileName}"></script>
+    <script id="rpress-props">${JSON.stringify(rpressProps)}</script>
   </body>
 </html>`.trim();
       const fileName = routePath.endsWith('/')
         ? `${routePath}index.html`
         : `${routePath}.html`;
-      await fs.ensureDir(join(root, 'build', dirname(fileName)));
-      await fs.writeFile(join(root, 'build', fileName), html);
+      await fs.ensureDir(join(root, CLIENT_OUTPUT, dirname(fileName)));
+      await fs.writeFile(join(root, CLIENT_OUTPUT, fileName), html);
     })
   );
-  // await fs.remove(join(root, '.temp'));
+  await fs.remove(join(root, '.temp'));
   console.log('Rendering page finished');
 }
 
 /**
  * SSG 的核心逻辑
- * 构建出client端 + server端
  * @param root
  */
 export async function build(root: string = process.cwd(), config: SiteConfig) {
-  // 1. bundle client端 + server端
+  // 1. 使用vite打包
+  // clientBundle中是一些依赖包和逻辑的打包结果
   const [clientBundle, serverBundle] = await bundle(root, config);
   // 2. 引入server-entry模块
   const serverEntryPath = join(root, '.temp', 'ssr-entry.js');
   // 3. 服务端渲染，产出html内容
-  // console.log(pathToFileURL(serverEntryPath).toString());
   /**
-   * react的render渲染函数
+   * 获取render渲染函数和路由信息
    */
   const { render, routes } = await import(
     pathToFileURL(serverEntryPath).toString()
   );
-  // const { render } = await import(serverEntryPath)
 
+  /**
+   * 渲染输出文件
+   */
   await renderPage(render, root, clientBundle as RollupOutput, routes);
 }
 
 /**
- * 完成客户端和服务器端的打包
+ * https://v3.vitejs.dev/guide/ssr.html#ssr-format
  * @param root
  */
 export async function bundle(root: string, config: SiteConfig) {
@@ -186,7 +207,7 @@ export async function bundle(root: string, config: SiteConfig) {
         build: {
           ssr: isServer,
           // 输出产物目录
-          outDir: isServer ? join(root, '.temp') : join(root, 'build'),
+          outDir: isServer ? join(root, '.temp') : join(root, CLIENT_OUTPUT),
           rollupOptions: {
             input: isServer ? SERVER_ENTRY_PATH : CLIENT_ENTRY_PATH,
             output: {
@@ -208,6 +229,11 @@ export async function bundle(root: string, config: SiteConfig) {
       clientBuild(),
       serverBuild()
     ]);
+    // 打包获取图片等资源
+    const publicDir = join(root, 'public');
+    if (fs.pathExistsSync(publicDir)) {
+      await fs.copy(publicDir, join(root, CLIENT_OUTPUT));
+    }
     spanner.stop();
 
     return [clientBundle, serverBundle] as [RollupOutput, RollupOutput];

@@ -18,7 +18,7 @@ export interface Route {
 export const CONVENTIONAL_ROUTE_ID = 'rpress:routes';
 
 /**
- * 将目标文件夹里面的文件递归生成 字符串形式的路由导出文件
+ * 路由插件
  * @param options
  * @returns
  */
@@ -26,14 +26,17 @@ export function pluginRoutes(options: PluginOption): Plugin {
   const routerService = new RouteService(options.root);
   return {
     name: CONVENTIONAL_ROUTE_ID,
+    // 解析vite配置后调用，不可修改，读取配置进行操作
     async configResolved() {
       await routerService.init();
     },
+    // 用于命中第三方依赖，执行load加载方法
     resolveId(id) {
       if (id === CONVENTIONAL_ROUTE_ID) {
         return '\0' + id;
       }
     },
+    // 加载函数，可返回自定义的内容
     load(id) {
       if (id === '\0' + CONVENTIONAL_ROUTE_ID) {
         /**

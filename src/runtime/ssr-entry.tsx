@@ -11,7 +11,9 @@ export interface RenderResult {
 }
 
 /**
- * 服务器端渲染逻辑
+ * 使用框架的SSR API渲染应用程序
+ * 向外提供一个render函数来渲染数据
+ * 提供一个路由路径 pagePath，然后获取到对应的路由绝对路径等信息（PageData）
  * @returns
  */
 export async function render(pagePath: string): Promise<RenderResult> {

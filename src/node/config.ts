@@ -8,6 +8,11 @@ type RawConfig =
   | Promise<UserConfig>
   | (() => UserConfig | Promise<UserConfig>);
 
+/**
+ * 找出root目录下有哪些配置文件
+ * @param root
+ * @returns
+ */
 function getUserConfigPath(root: string) {
   try {
     const supportConfigFiles = ['config.ts', 'config.js'];

@@ -1,7 +1,19 @@
-import { throttle } from 'lodash-es';
+// import { throttle } from 'lodash-es';
 
 let links: HTMLAnchorElement[] = [];
 const NAV_HEIGHT = 56;
+
+export function throttle(Fn: () => void, delay = 100) {
+  let last = Date.now();
+  let cur;
+  return (...args) => {
+    cur = Date.now();
+    if (cur - last > delay) {
+      Fn.apply(Fn, args);
+      last = cur;
+    }
+  };
+}
 
 export function scrollToTarget(target: HTMLElement, isSmooth: boolean) {
   const targetPadding = parseInt(
@@ -41,13 +53,15 @@ export function bindingAsideScroll() {
     }
   };
   const setActiveLink = () => {
+    console.log('111');
     links = Array.from(
       document.querySelectorAll<HTMLAnchorElement>('.rpress-doc .header-anchor')
     ).filter((item) => item.parentElement?.tagName !== 'H1');
     const isBottom =
-      document.documentElement.scrollTop + window.innerHeight >=
+      document.documentElement.scrollTop + window.innerHeight + 20 >=
       document.documentElement.scrollHeight;
     // 1. 如果已经滑动到底部，我们将最后一个 link 高亮即可
+    // console.log(document.documentElement.scrollTop + window.innerHeight, document.documentElement.scrollHeight)
     if (isBottom) {
       activate(links, links.length - 1);
       return;
@@ -74,6 +88,7 @@ export function bindingAsideScroll() {
     }
   };
   const throttledSetActiveLink = throttle(setActiveLink);
+  // const throttledSetActiveLink = setActiveLink
   window.addEventListener('scroll', throttledSetActiveLink);
   return () => {
     window.removeEventListener('scroll', throttledSetActiveLink);

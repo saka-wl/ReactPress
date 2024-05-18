@@ -20,9 +20,7 @@ export function Sidebar(props: SidebarProps) {
           block="~"
           text="sm"
           font-medium="~"
-          className={`${styles.linkHover} ${
-            active ? styles.textBrand : 'text-text-2'
-          }`}
+          className={`${active ? 'text-brand' : 'text-text-2'}`}
         >
           <Link href={item.link}>{item.text}</Link>
         </div>

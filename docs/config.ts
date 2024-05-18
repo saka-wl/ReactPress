@@ -10,7 +10,7 @@ export default defineConfig({
             },
             {
                 text: "指南",
-                link: "/guide/a"
+                link: "/guide/"
             }
         ],
         // 新增 sidebar 的内容

@@ -6,14 +6,14 @@ import {
   SERVER_ENTRY_PATH,
   createDevServer,
   createVitePlugins
-} from "./chunk-36LMFSO2.mjs";
+} from "./chunk-XD34EHWZ.mjs";
 import {
   resolveConfig
 } from "./chunk-4J7KUVM4.mjs";
 
 // src/node/cli.ts
 import cac from "cac";
-import { resolve } from "path";
+import { resolve as resolve2 } from "path";
 
 // src/node/build.ts
 import { build as viteBuild } from "vite";
@@ -86,19 +86,25 @@ async function renderPage(render, root, clientBundle, routes) {
     (chunk) => chunk.type === "chunk" && chunk.isEntry
   );
   await Promise.all(
-    routes.map(async (route) => {
+    [...routes, {
+      path: "/404"
+    }].map(async (route) => {
       const routePath = route.path;
+      const helmetContext = {
+        context: {}
+      };
       console.log(routePath);
       const {
         appHtml,
         rpressProps = [],
         rpressToPathMap
-      } = await render(routePath);
+      } = await render(routePath, helmetContext.context);
       const styleAssets = clientBundle.output.filter(
         (chunk) => chunk.type === "asset" && chunk.fileName.endsWith(".css")
       );
       const rpressBundle = await buildRpress(root, rpressToPathMap);
       const rpressCode = rpressBundle.output[0].code;
+      const { helmet } = helmetContext.context;
       const normalizeVendorFilename = (fileName2) => fileName2.replace(/\//g, "_") + ".js";
       const html = `
 <!DOCTYPE html>
@@ -106,7 +112,10 @@ async function renderPage(render, root, clientBundle, routes) {
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>title</title>
+    ${helmet?.title?.toString() || ""}
+    ${helmet?.meta?.toString() || ""}
+    ${helmet?.link?.toString() || ""}
+    ${helmet?.style?.toString() || ""}
     <meta name="description" content="xxx">
     ${styleAssets.map((item) => `<link rel="stylesheet" href="/${item.fileName}">`).join("\n")}
       <script type="importmap">
@@ -193,6 +202,50 @@ async function bundle(root, config) {
   }
 }
 
+// src/node/preview.ts
+import compression from "compression";
+import { resolve } from "path";
+import fs2 from "fs-extra";
+import sirv from "sirv";
+var dynamicImport2 = new Function("m", "return import(m)");
+var DEFAULT_PORT = 4173;
+async function preview(root, { port }) {
+  const config = await resolveConfig(root, "serve", "production");
+  const listenPort = port ?? DEFAULT_PORT;
+  const outputDir = resolve(root, "build");
+  const { default: express } = await dynamicImport2("express");
+  const notFoundPage = fs2.readFileSync(
+    resolve(outputDir, "404.html"),
+    "utf-8"
+  );
+  const compress = compression();
+  const app = express();
+  const serve = sirv(outputDir, {
+    etag: true,
+    maxAge: 31536e3,
+    immutable: true,
+    setHeaders(res, pathname) {
+      if (pathname.endsWith(".html")) {
+        res.setHeader("Cache-Control", "no-cache");
+      }
+    }
+  });
+  app.use(compress);
+  app.use(serve);
+  app.use("*", function(req, res) {
+    res.end(notFoundPage);
+  });
+  app.listen(
+    listenPort,
+    (err) => {
+      if (err) {
+        throw err;
+      }
+      console.log(`> Preview server is running at http://localhost:${listenPort}`);
+    }
+  );
+}
+
 // src/node/cli.ts
 var cli = cac("rpress").version("0.0.1").help();
 cli.command("dev [root]", "start dev server").action(async (root) => {
@@ -208,11 +261,19 @@ cli.command("dev [root]", "start dev server").action(async (root) => {
 });
 cli.command("build [root]", "build in production").action(async (root) => {
   try {
-    root = resolve(root);
+    root = resolve2(root);
     const config = await resolveConfig(root, "build", "production");
     await build(root, config);
   } catch (err) {
     console.log(err);
+  }
+});
+cli.command("preview [root]", "preview production build").option("--port <port>", "port to use for preview server").action(async (root, { port }) => {
+  try {
+    root = resolve2(root);
+    await preview(root, { port });
+  } catch (e) {
+    console.log(e);
   }
 });
 cli.parse();

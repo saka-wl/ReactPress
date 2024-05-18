@@ -3,6 +3,7 @@ import { renderToString } from 'react-dom/server';
 import { StaticRouter } from 'react-router-dom/server';
 import { DataContext } from './hooks';
 // import { clearRpressData, data } from './jsx-runtime';
+import { HelmetProvider } from 'react-helmet-async';
 
 export interface RenderResult {
   appHtml: string;
@@ -16,7 +17,10 @@ export interface RenderResult {
  * 提供一个路由路径 pagePath，然后获取到对应的路由绝对路径等信息（PageData）
  * @returns
  */
-export async function render(pagePath: string): Promise<RenderResult> {
+export async function render(
+  pagePath: string,
+  helmetContext: object
+): Promise<RenderResult> {
   const pageData = await initPageData(pagePath);
   const { clearRpressData, data } = await import('./jsx-runtime');
   // 拿到 rpress 组件相关数据
@@ -26,11 +30,14 @@ export async function render(pagePath: string): Promise<RenderResult> {
   clearRpressData();
   return {
     appHtml: renderToString(
-      <DataContext.Provider value={pageData}>
-        <StaticRouter location={pagePath}>
-          <App />
-        </StaticRouter>
-      </DataContext.Provider>
+      // 新增 HelmetProvider 参数
+      <HelmetProvider context={helmetContext}>
+        <DataContext.Provider value={pageData}>
+          <StaticRouter location={pagePath}>
+            <App />
+          </StaticRouter>
+        </DataContext.Provider>
+      </HelmetProvider>
     ),
     rpressProps,
     rpressToPathMap

@@ -5,6 +5,7 @@ import { visit } from 'unist-util-visit';
 import { Root } from 'mdast';
 import type { MdxjsEsm } from 'mdast-util-mdxjs-esm';
 import { ecmaVersion, parse } from 'acorn';
+import { Program } from '@mdx-js/mdx/lib/core';
 
 interface TocItem {
   id: string;
@@ -22,10 +23,14 @@ export const remarkPluginToc: Plugin<[], Root> = () => {
   return (tree) => {
     const toc: TocItem[] = [];
     const slugger = new Slugger();
+    let title = '';
 
     visit(tree, 'heading', (node) => {
       if (!node.depth || !node.children?.length) {
         return;
+      }
+      if (node.depth === 1) {
+        title = (node.children[0] as ChildNode).value;
       }
       // h2 - h4
       // node.children 是一个数组，包含几种情况:
@@ -82,5 +87,19 @@ export const remarkPluginToc: Plugin<[], Root> = () => {
         })
       }
     } as MdxjsEsm);
+
+    if (title) {
+      const insertedTitle = `export const title = '${title}'`;
+      tree.children.push({
+        type: 'mdxjsEsm',
+        value: insertedTitle,
+        data: {
+          estree: parse(insertedTitle, {
+            ecmaVersion: 2020,
+            sourceType: 'module'
+          }) as unknown as Program
+        }
+      } as MdxjsEsm);
+    }
   };
 };

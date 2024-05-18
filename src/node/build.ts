@@ -14,6 +14,7 @@ import { SiteConfig } from 'shared/types';
 import { createVitePlugins } from './vitePlugins';
 import type { RouteObject } from 'react-router-dom';
 import { RenderResult } from '../runtime/ssr-entry';
+import { HelmetData } from 'react-helmet-async';
 
 const dynamicImport = new Function('m', 'return import(m)');
 
@@ -97,7 +98,7 @@ async function buildRpress(
  * @param clientBundle
  */
 export async function renderPage(
-  render: (pagePath: string) => Promise<RenderResult>,
+  render: (pagePath: string, helmetContext: object) => Promise<RenderResult>,
   root: string,
   clientBundle: RollupOutput,
   routes: RouteObject[]
@@ -110,21 +111,30 @@ export async function renderPage(
   // console.log(clientChunk)
   // console.log(routes)
   await Promise.all(
-    routes.map(async (route) => {
+    [
+      ...routes,
+      {
+        path: '/404'
+      }
+    ].map(async (route) => {
       const routePath = route.path;
+      const helmetContext = {
+        context: {}
+      } as HelmetData;
       console.log(routePath);
       // 在node服务器中生成相应的html等文件
       const {
         appHtml,
         rpressProps = [],
         rpressToPathMap
-      } = await render(routePath);
+      } = await render(routePath, helmetContext.context);
       const styleAssets = clientBundle.output.filter(
         (chunk) => chunk.type === 'asset' && chunk.fileName.endsWith('.css')
       );
       const rpressBundle = await buildRpress(root, rpressToPathMap);
       const rpressCode = (rpressBundle as RollupOutput).output[0].code;
       // console.log(rpressCode)
+      const { helmet } = helmetContext.context;
       const normalizeVendorFilename = (fileName: string) =>
         fileName.replace(/\//g, '_') + '.js';
       const html = `
@@ -133,7 +143,10 @@ export async function renderPage(
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>title</title>
+    ${helmet?.title?.toString() || ''}
+    ${helmet?.meta?.toString() || ''}
+    ${helmet?.link?.toString() || ''}
+    ${helmet?.style?.toString() || ''}
     <meta name="description" content="xxx">
     ${styleAssets
       .map((item) => `<link rel="stylesheet" href="/${item.fileName}">`)

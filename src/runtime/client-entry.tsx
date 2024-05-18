@@ -4,6 +4,7 @@ import { BrowserRouter } from 'react-router-dom';
 import { DataContext } from './hooks';
 import { checkTheTheme } from '../theme-default/logic/toggleAppearance';
 import { ComponentType } from 'react';
+import { HelmetProvider } from 'react-helmet-async';
 
 declare global {
   interface Window {
@@ -18,11 +19,13 @@ async function renderInBrowser() {
   const pageData = await initPageData(location.pathname);
   checkTheTheme();
   createRoot(containerEl).render(
-    <DataContext.Provider value={pageData}>
-      <BrowserRouter>
-        <App />
-      </BrowserRouter>
-    </DataContext.Provider>
+    <HelmetProvider>
+      <DataContext.Provider value={pageData}>
+        <BrowserRouter>
+          <App />
+        </BrowserRouter>
+      </DataContext.Provider>
+    </HelmetProvider>
   );
   if (!import.meta.env.DEV) {
     // 生产环境下的 Partial Hydration

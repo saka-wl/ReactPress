@@ -39,7 +39,7 @@ export function Nav() {
             ))}
           </div>
           <div before="menu-item-before" flex="~">
-            <SwitchAppearance />
+            <SwitchAppearance __rpress />
           </div>
           {/* 相关链接 */}
           <div

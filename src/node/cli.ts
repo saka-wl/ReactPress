@@ -1,9 +1,10 @@
 import cac from 'cac';
 import { createDevServer } from './dev';
-import { resolve } from 'path';
+import { join, resolve } from 'path';
 import { build } from './build';
 import { resolveConfig } from './config';
 import { preview } from './preview';
+import fs from 'fs-extra';
 
 const cli = cac('rpress').version('0.0.1').help();
 
@@ -36,6 +37,8 @@ cli
   .action(async (root: string) => {
     try {
       root = resolve(root);
+      fs.existsSync(join(root, 'build')) &&
+        (await fs.remove(join(root, 'build')));
       const config = await resolveConfig(root, 'build', 'production');
       await build(root, config);
     } catch (err) {

@@ -17,26 +17,51 @@ import babelPluginRpress from './babel-plugin-rpress';
 export async function createVitePlugins(
   config: SiteConfig,
   restart?: () => Promise<void>,
-  isSSR = false
+  isSSR = false,
+  isDev = true
 ) {
-  return [
-    pluginUnocss(unocssOptions),
-    pluginIndexHtml(),
-    pluginReact({
-      jsxRuntime: 'automatic',
-      // 控制jsx的导入位置
-      jsxImportSource: isSSR
-        ? path.join(PACKET_ROOT, 'src', 'runtime')
-        : 'react',
-      babel: {
-        plugins: [babelPluginRpress]
-      }
-    }),
-    pluginConfig(config, restart),
-    pluginRoutes({
-      root: config.root,
-      isSSR
-    }),
-    await createMdxPlugins()
-  ];
+  // console.log(path.join(PACKET_ROOT, 'src', 'runtime'))
+  if (isDev) {
+    return [
+      pluginUnocss(unocssOptions),
+      pluginIndexHtml(),
+      pluginReact({
+        jsxRuntime: 'automatic',
+        // 控制jsx的导入位置
+        jsxImportSource: isSSR
+          ? path.join(PACKET_ROOT, 'src', 'runtime')
+          : 'react',
+        babel: {
+          plugins: [babelPluginRpress]
+        }
+      }),
+      pluginConfig(config, restart),
+      pluginRoutes({
+        root: config.root,
+        isSSR
+      }),
+      await createMdxPlugins()
+    ];
+  } else {
+    return [
+      pluginUnocss(unocssOptions),
+      // pluginIndexHtml(),
+      pluginReact({
+        jsxRuntime: 'automatic',
+        // 控制jsx的导入位置
+        jsxImportSource: isSSR
+          ? path.join(PACKET_ROOT, 'src', 'runtime')
+          : 'react',
+        babel: {
+          plugins: [babelPluginRpress]
+        }
+      }),
+      pluginConfig(config, restart),
+      pluginRoutes({
+        root: config.root,
+        isSSR
+      }),
+      await createMdxPlugins()
+    ];
+  }
 }

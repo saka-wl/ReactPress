@@ -6,14 +6,14 @@ import {
   SERVER_ENTRY_PATH,
   createDevServer,
   createVitePlugins
-} from "./chunk-XD34EHWZ.mjs";
+} from "./chunk-5VPSPOJT.mjs";
 import {
   resolveConfig
 } from "./chunk-4J7KUVM4.mjs";
 
 // src/node/cli.ts
 import cac from "cac";
-import { resolve as resolve2 } from "path";
+import { join as join2, resolve as resolve2 } from "path";
 
 // src/node/build.ts
 import { build as viteBuild } from "vite";
@@ -54,10 +54,10 @@ async function buildRpress(root, rpressToPathMap) {
         name: "rpress:inject",
         enforce: "post",
         // rpress:inject../../components/Aside/index!!RPRESS!!D:/font/mydemo/ReactPress/src/theme-default/Layout/DocLayout/index.tsx
-        resolveId(id) {
+        async resolveId(id) {
           if (id.includes(MASK_SPLITTER)) {
             const [originId, importer] = id.split(MASK_SPLITTER);
-            return this.resolve(originId, importer, { skipSelf: true });
+            return await this.resolve(originId, importer, { skipSelf: true });
           }
           if (id === injectId) {
             return id;
@@ -82,13 +82,17 @@ async function buildRpress(root, rpressToPathMap) {
 }
 async function renderPage(render, root, clientBundle, routes) {
   console.log("Rendering page in server side...");
+  fs.existsSync(join(root, ".temp")) && await fs.remove(join(root, ".temp"));
   const clientChunk = clientBundle.output.find(
     (chunk) => chunk.type === "chunk" && chunk.isEntry
   );
   await Promise.all(
-    [...routes, {
-      path: "/404"
-    }].map(async (route) => {
+    [
+      ...routes,
+      {
+        path: "/404"
+      }
+    ].map(async (route) => {
       const routePath = route.path;
       const helmetContext = {
         context: {}
@@ -118,15 +122,15 @@ async function renderPage(render, root, clientBundle, routes) {
     ${helmet?.style?.toString() || ""}
     <meta name="description" content="xxx">
     ${styleAssets.map((item) => `<link rel="stylesheet" href="/${item.fileName}">`).join("\n")}
-      <script type="importmap">
-        {
-          "imports": {
-            ${EXTERNALS.map(
+    <script type="importmap">
+      {
+        "imports": {
+          ${EXTERNALS.map(
         (name) => `"${name}": "/${normalizeVendorFilename(name)}"`
       ).join(",")}
-          }
         }
-      </script>
+      }
+    </script>
   </head>
   <body>
     <div id="root">${appHtml}</div>
@@ -140,11 +144,11 @@ async function renderPage(render, root, clientBundle, routes) {
       await fs.writeFile(join(root, CLIENT_OUTPUT, fileName), html);
     })
   );
-  await fs.remove(join(root, ".temp"));
+  fs.existsSync(join(root, ".temp")) && await fs.remove(join(root, ".temp"));
   console.log("Rendering page finished");
 }
 async function build(root = process.cwd(), config) {
-  const [clientBundle, serverBundle] = await bundle(root, config);
+  const clientBundle = await bundle(root, config);
   const serverEntryPath = join(root, ".temp", "ssr-entry.js");
   const { render, routes } = await import(pathToFileURL(serverEntryPath).toString());
   await renderPage(render, root, clientBundle, routes);
@@ -159,10 +163,10 @@ async function bundle(root, config) {
       return {
         mode: "production",
         root,
-        plugins: await createVitePlugins(config, void 0, isServer),
+        plugins: await createVitePlugins(config, void 0, isServer, false),
         ssr: {
-          // 注意加上这个配置，防止 cjs 产物中 require ESM 的产物，因为 react-router-dom 的产物为 ESM 格式
-          noExternal: ["react-router-dom", "lodash-es"]
+          // 注意加上这个配置，防止 cjs 产物中 require ESM 的产物，因为 react-router-dom 的产物为 ESM 格式  'lodash-es'
+          noExternal: ["react-router-dom"]
         },
         build: {
           ssr: isServer,
@@ -180,30 +184,27 @@ async function bundle(root, config) {
     };
     const clientBuild = async () => {
       const client = await resolveViteConfig(false);
-      return viteBuild(client);
+      return await viteBuild(client);
     };
     const serverBuild = async () => {
       const server = await resolveViteConfig(true);
-      return viteBuild(server);
+      return await viteBuild(server);
     };
-    const [clientBundle, serverBundle] = await Promise.all([
-      clientBuild(),
-      serverBuild()
-    ]);
+    await serverBuild();
+    const clientBundle = await clientBuild();
     const publicDir = join(root, "public");
     if (fs.pathExistsSync(publicDir)) {
       await fs.copy(publicDir, join(root, CLIENT_OUTPUT));
     }
     await fs.copy(join(PACKET_ROOT, "vendors"), join(root, CLIENT_OUTPUT));
     spanner.stop();
-    return [clientBundle, serverBundle];
+    return clientBundle;
   } catch (err) {
     console.log(err);
   }
 }
 
 // src/node/preview.ts
-import compression from "compression";
 import { resolve } from "path";
 import fs2 from "fs-extra";
 import sirv from "sirv";
@@ -214,11 +215,7 @@ async function preview(root, { port }) {
   const listenPort = port ?? DEFAULT_PORT;
   const outputDir = resolve(root, "build");
   const { default: express } = await dynamicImport2("express");
-  const notFoundPage = fs2.readFileSync(
-    resolve(outputDir, "404.html"),
-    "utf-8"
-  );
-  const compress = compression();
+  const notFoundPage = fs2.readFileSync(resolve(outputDir, "404.html"), "utf-8");
   const app = express();
   const serve = sirv(outputDir, {
     etag: true,
@@ -230,23 +227,22 @@ async function preview(root, { port }) {
       }
     }
   });
-  app.use(compress);
   app.use(serve);
   app.use("*", function(req, res) {
     res.end(notFoundPage);
   });
-  app.listen(
-    listenPort,
-    (err) => {
-      if (err) {
-        throw err;
-      }
-      console.log(`> Preview server is running at http://localhost:${listenPort}`);
+  app.listen(listenPort, (err) => {
+    if (err) {
+      throw err;
     }
-  );
+    console.log(
+      `> Preview server is running at http://localhost:${listenPort}`
+    );
+  });
 }
 
 // src/node/cli.ts
+import fs3 from "fs-extra";
 var cli = cac("rpress").version("0.0.1").help();
 cli.command("dev [root]", "start dev server").action(async (root) => {
   const createServer = async () => {
@@ -262,6 +258,7 @@ cli.command("dev [root]", "start dev server").action(async (root) => {
 cli.command("build [root]", "build in production").action(async (root) => {
   try {
     root = resolve2(root);
+    fs3.existsSync(join2(root, "build")) && await fs3.remove(join2(root, "build"));
     const config = await resolveConfig(root, "build", "production");
     await build(root, config);
   } catch (err) {

@@ -24,7 +24,7 @@
     "rpress": "bin/rpress.js"
   },
   "keywords": [],
-  "author": "",
+  "author": "saka-wl",
   "license": "ISC",
   "dependencies": {
     "@babel/core": "7.0.0",
@@ -42,7 +42,6 @@
     "fs-extra": "^11.2.0",
     "github-slugger": "^2.0.0",
     "hast-util-from-html": "^2.0.1",
-    "lodash-es": "^4.17.21",
     "mdast-util-mdxjs-esm": "^2.0.1",
     "pnpm": "^9.1.0",
     "polka": "^0.5.2",

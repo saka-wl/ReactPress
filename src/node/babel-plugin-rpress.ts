@@ -38,11 +38,12 @@ export default declare(async (api) => {
         // 其它 type 忽略
         return;
       }
+      // 根据作用域信息拿到组件引入的位置
       const binding = path.scope.getBinding(bindingName);
       if (binding?.path?.parent?.type === 'ImportDeclaration') {
         // 定位到 import 语句之后，我们拿到 Island 组件对应的引入路径
         const source = binding.path.parent.source;
-        // 然后将 __rpress prop 进行修改
+        // 然后将 __rpress 值进行修改
         const attributes = (path.container as JSXElement).openingElement
           .attributes;
         for (let i = 0; i < attributes.length; i++) {

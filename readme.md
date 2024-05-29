@@ -10,32 +10,117 @@
 1. 先通过`cac`来识别`rpress dev [root]`命令，可以获取到`[root]`路径，然后通过`vite`的`createServer`方法来创建服务即可运行
 
 2. 在`createServer`中，可以放入几个插件（`pluginIndexHtml`，`pluginReact`，`pluginConfig`，`pluginRoutes`）
-    - `pluginIndexHtml`中，会获取`template.html`中的`index.html`模板，并且直接引入`client-entry`入口文件内容，`client-entry`里面是一个被`Router`与`Redux`包裹的`App.jsx`
-    
-        - 先获取所有路由页面类型（`home`，`doc`）与用户在`.mdx`文件中书写的变量数据（通过`createMdxPlugins`插件可以获取数据），通过`Redux`传给所有的子组件，然后根据页面类型来用不同的组件渲染页面
-    
-    - `pluginReact`能够解析`react`内容，也就是为何引入的入口文件内容是`react`代码但会被解析出来的原因
-    
+    - `pluginReact`能够配置`react`局部热更新与`react`内的标签
+
     - `pluginConfig`能够读取用户写的配置文件和当配置修改时热更新重启服务
-    
+
         - 配置是指用户自己配置的`defineConfig`，能够传给网页中；
-        - 那么如何获取到用户配置文件呢？通过`vite` 的`loadConfigFromFile`方法来获取文件内容
-        - 那么如何来解决配置文件更新时，重启服务呢？早在`cli.ts`入口文件中就加入了`restart`的方法，然后一直透传到配置文件模块，最后在`handleHotUpdate`钩子处来判断是否重启服
-    
-    - `pluginRoutes`能在开发环境配置路由，通过`RouteService`类来获取用户配置的路由路径和绝对路径，然后再返回路由的`esm`导出信息，最后在`client-entry`入口文件内导入`esm`导出的信息来获取路由配置
-    
+        - 那么如何获取到用户配置文件呢？先遍历目标文件夹找出配置文件，再通过`vite` 的`loadConfigFromFile`方法来获取文件内容
+        - 那么如何来解决配置文件更新时，重启服务呢？早在`cli.ts`入口文件中就加入了`restart`的方法，然后一直透传到配置文件模块，最后在`handleHotUpdate`钩子处来判断是否重启服务
+
+    - `pluginRoutes`插件可以获取到用户配置的路由信息
+
         - 如何准确确定哪些文件需要路由处理呢？先获取路由的根文件夹，然后使用`FastGlob`库来查找一些目标文件，比如：`['**/*.{js,jsx,ts,tsx,md,mdx}']`的文件
-    
+
+        - 获取到文件信息之后，将得到的信息拼接为`esm`形式的字符串，在`load`时返回出去，这样我们就可以在下面的操作时获取到该信息
+
+          信息格式：
+
+          ```js
+          import React from 'react';
+          import loadable from "@loadable/component";
+          const Route0 = loadable(() => import('D:/font/mydemo/ReactPress/docs/Counter.tsx'));
+          const Route1 = loadable(() => import('D:/font/mydemo/ReactPress/docs/guide/a.jsx'));
+          export const routes = [
+              { path: '/Counter', element: React.createElement(Route0), preload: () => import('D:/font/mydemo/ReactPress/docs/Counter.tsx') },
+              { path: '/guide/a', element: React.createElement(Route1), preload: () => import('D:/font/mydemo/ReactPress/docs/guide/a.jsx') },
+          ];
+          ```
+
+          在其中，我们使用 @loadable/component 包中的`loadable`实现了代码拆分，按需加载代码，避免了下载不需要的代码，减少了初始加载期间所需的代码量
+
+        - 下面我们可以这样获取数据
+
+          ```js
+          import { routes } from 'rpress:routes';
+          routes: RouteObject[] = [
+              {
+                  path: '/',
+                  element: {
+                      '$$typeof': Symbol(react.element),
+                      type: [Function: MDXContent],
+                      key: null,
+                      ref: null,
+                      props: {},
+                      _owner: null
+                  },
+                  preload: [Function: preload]
+              }...
+          ]
+          ```
+
+        - 接下来是如何使用这些数据，使用`react-router-dom`中的`matchRoutes`方法来匹配路由，如果匹配到了就使用上文提供的`preload`方法来动态加载路由获取相应的路由`html`代码
+
+    - `pluginIndexHtml`插件则是`rpress dev [root]`专用的来添加开发预览服务的，会以`client-entry`为入口然后运行`react` 文件
+
     - `createMdxPlugins`，该插件是来将`.md`等文件转换为`html`的代码，插件主要由`@mdx-js/rollup`的`pluginMdx`函数来集成，
-    
+
         分为`remarkPlugins`和`rehypePlugins`插件配置
-    
+
         - `remarkPlugins`中，使用了`remarkPluginGFM`来生成`github`风格的`GFM(Markdown)`；使用了`remarkFrontmatter`来解析`mdx`文档信息；使用了`remarkMdxFrontmatter`来收集元信息；使用了`remarkPluginToc`来处理标题部分
+
+          - `remarkMdxFrontmatter`插件会将收集到的主页面的页面（最上层`doc`文件夹的`index.mdx`）元信息导出
+          - `remarkPluginToc`插件中，使用`visit`的方式来遍历`mdx`文档，然后选择符合规范的标题类型数据加入到`toc`数组中并且导出，比如：
+
+            ```md
+            ---
+            name: saka-wl
+            ---
+            # Hello
+            ## from {frontmatter.name}
+            ## this is toc - 01
+            ### this is toc - 01-01
+            ## this is toc - 02
+            ```
+
+            ```js
+            export const frontmatter = {
+              "name": "saka-wl"
+            };
+            export const toc = [{
+              "id": "from-frontmattername",
+              "text": "from frontmatter.name",
+              "depth": 2
+            }, {
+              "id": "this-is-toc---01",
+              "text": "this is toc - 01",
+              "depth": 2
+            }];
+            export const title = 'Hello';
+            ```
+
         - `rehypePlugins`中，使用了`rehypePluginSlug`来添加元素的`id`属性；使用了`rehypePluginAutolinkHeadings`来生成锚点信息和跳转链接；使用了`rehypePluginPreWrapper`来添加语言类型标签；使用了`rehypePluginShiki`来添加代码块高亮
-    
+
+        - `rehypePluginPreWrapper`插件是来处理代码块的，将原本的代码块类型代码中添加代码的类型
+
+          ```html
+          <pre>
+             <code class="language-js">console.log(123);</code>
+          </pre>
+          -->>
+          <div class="language-js">
+             <span class="lang">js</span>
+             <pre>
+                <code class="">console.log(123);</code>
+             </pre>
+          </div>
+          ```
+
     - `pluginMdxHMR`中，利用`react-refresh`配置了`.mdx`文件的热更新
-    
-3. 我们也在程序中实现了约定式路由，使用方法是先通过路由标签来包裹`<App />`，然后在`runtime`文件夹下面做一个配置（有哪些路由），最后再在`docs`文件夹中书写详细的路由
+
+3. 我们也在程序中实现了约定式路由，先在`config.ts`中约定`Nav`组件中有哪些路由跳转，以及相应的侧边栏路由跳转，然后通过`pluginConfig`用户自定义插件将配置传给相应的组件
+
+
 
 - 然后讲讲`rpress dev [root]`的实现，用来打包程序的，下面是实现方式：
 

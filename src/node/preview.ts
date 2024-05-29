@@ -18,7 +18,7 @@ export async function preview(root: string, { port }: { port?: number }) {
   const { default: express } = await dynamicImport('express');
 
   const notFoundPage = fs.readFileSync(resolve(outputDir, '404.html'), 'utf-8');
-  const compress = compression();
+  // const compress = compression();
   const app = express();
 
   // 静态资源服务
@@ -33,10 +33,9 @@ export async function preview(root: string, { port }: { port?: number }) {
     }
   });
 
-  app.use(compress);
+  // app.use(compress);
   app.use(serve);
   app.use('*', function (req, res) {
-    // res.statusCode = 200
     res.end(notFoundPage);
   });
 

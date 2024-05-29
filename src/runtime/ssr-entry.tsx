@@ -23,22 +23,33 @@ export async function render(
 ): Promise<RenderResult> {
   const pageData = await initPageData(pagePath);
   const { clearRpressData, data } = await import('./jsx-runtime');
-  // 拿到 rpress 组件相关数据
-  const { rpressProps, rpressToPathMap } = data;
+  clearRpressData();
   // renderToString 将 React 树渲染为一个 HTML 字符串
   // <StaticRouter> is used to render a React Router web app in node.
-  clearRpressData();
+  // 通过给定的路由路径pagePath与页面数据pageData来渲染一个特定的页面
+  const appHtml = renderToString(
+    // 新增 HelmetProvider 参数
+    <HelmetProvider context={helmetContext}>
+      <DataContext.Provider value={pageData}>
+        <StaticRouter location={pagePath}>
+          <App />
+        </StaticRouter>
+      </DataContext.Provider>
+    </HelmetProvider>
+  );
+  // 拿到 rpress 组件相关数据
+  /**
+   * 
+  {
+    rpressProps: [ {} ],
+    rpressToPathMap: {
+      SwitchAppearance: '../SwitchAppearance!!RPRESS!!D:/font/mydemo/ReactPress/src/theme-default/components/Nav/index.tsx'
+    }
+  }
+   */
+  const { rpressProps, rpressToPathMap } = data;
   return {
-    appHtml: renderToString(
-      // 新增 HelmetProvider 参数
-      <HelmetProvider context={helmetContext}>
-        <DataContext.Provider value={pageData}>
-          <StaticRouter location={pagePath}>
-            <App />
-          </StaticRouter>
-        </DataContext.Provider>
-      </HelmetProvider>
-    ),
+    appHtml,
     rpressProps,
     rpressToPathMap
   };

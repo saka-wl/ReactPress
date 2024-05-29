@@ -1,5 +1,5 @@
 import type { Plugin } from 'unified';
-// 处理
+// 生成 id
 import Slugger from 'github-slugger';
 import { visit } from 'unist-util-visit';
 import { Root } from 'mdast';
@@ -19,6 +19,17 @@ interface ChildNode {
   children?: ChildNode[];
 }
 
+/**
+ * 生成类似以下的格式
+ * export const tocs = [
+      {
+        "id": "框架定位",
+        "text": "框架定位",
+        "depth": 2
+      }, ...
+ * ]
+ * @returns 
+ */
 export const remarkPluginToc: Plugin<[], Root> = () => {
   return (tree) => {
     const toc: TocItem[] = [];
@@ -67,6 +78,8 @@ export const remarkPluginToc: Plugin<[], Root> = () => {
             }
           })
           .join('');
+        // A -> A
+        // A -> A-1
         const id = slugger.slug(originalText);
         toc.push({
           id,
@@ -75,31 +88,56 @@ export const remarkPluginToc: Plugin<[], Root> = () => {
         });
       }
     });
-    // 注入 export const toc = [] 信息
-    const insertedCode = `export const toc = ${JSON.stringify(toc, null, 2)}`;
-    tree.children.push({
-      type: 'mdxjsEsm',
-      value: insertedCode,
-      data: {
-        estree: parse(insertedCode, {
-          ecmaVersion: '2020' as ecmaVersion,
-          sourceType: 'module'
-        })
-      }
-    } as MdxjsEsm);
 
-    if (title) {
-      const insertedTitle = `export const title = '${title}'`;
+    const treeAddMsg = (name: string, value: string, isString: boolean) => {
+      let inserted;
+      if (!isString) {
+        inserted = `export const ${name} = ${value}`;
+      } else {
+        inserted = `export const ${name} = '${value}'`;
+      }
       tree.children.push({
         type: 'mdxjsEsm',
-        value: insertedTitle,
+        value: inserted,
         data: {
-          estree: parse(insertedTitle, {
+          estree: parse(inserted, {
             ecmaVersion: 2020,
             sourceType: 'module'
-          }) as unknown as Program
+          })
         }
       } as MdxjsEsm);
-    }
+    };
+
+    // 注入 export const toc = [] 信息
+    treeAddMsg('toc', JSON.stringify(toc, null, 2), false);
+
+    /**
+     * h1 标题
+     */
+    if (title) treeAddMsg('title', title, true);
   };
 };
+
+// const insertedCode = `export const toc = ${JSON.stringify(toc, null, 2)}`;
+// tree.children.push({
+//   type: 'mdxjsEsm',
+//   value: insertedCode,
+//   data: {
+//     estree: parse(insertedCode, {
+//       ecmaVersion: '2020' as ecmaVersion,
+//       sourceType: 'module'
+//     })
+//   }
+// } as MdxjsEsm);
+
+//   const insertedTitle = `export const title = '${title}'`;
+//   tree.children.push({
+//     type: 'mdxjsEsm',
+//     value: insertedTitle,
+//     data: {
+//       estree: parse(insertedTitle, {
+//         ecmaVersion: 2020,
+//         sourceType: 'module'
+//       }) as unknown as Program
+//     }
+//   } as MdxjsEsm);

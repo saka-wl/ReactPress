@@ -5,10 +5,12 @@ import remarkPluginGFM from 'remark-gfm';
 import rehypePluginAutolinkHeadings from 'rehype-autolink-headings';
 // 添加id属性
 import rehypePluginSlug from 'rehype-slug';
+// 将mdx文件中命名的变量提取出来
 import remarkMdxFrontmatter from 'remark-mdx-frontmatter';
 import remarkFrontmatter from 'remark-frontmatter';
 import { rehypePluginPreWrapper } from './rehypePlugins/preWrapper';
 import { rehypePluginShiki } from './rehypePlugins/shiki';
+// https://shiki.style/guide/install
 import shiki from 'shiki';
 import { remarkPluginToc } from './remarkPlugins/toc';
 
@@ -42,6 +44,7 @@ export async function pluginMdxRollup(): Promise<Plugin> {
           }
         }
       ],
+      // 处理代码块
       rehypePluginPreWrapper,
       [
         rehypePluginShiki,

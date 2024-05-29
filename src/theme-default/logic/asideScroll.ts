@@ -53,7 +53,6 @@ export function bindingAsideScroll() {
     }
   };
   const setActiveLink = () => {
-    console.log('111');
     links = Array.from(
       document.querySelectorAll<HTMLAnchorElement>('.rpress-doc .header-anchor')
     ).filter((item) => item.parentElement?.tagName !== 'H1');

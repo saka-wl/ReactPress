@@ -65,6 +65,8 @@ export class RouteService {
 
   /**
    * 生成esm导出类型的路由
+   * 使用 @loadable/component 包中的代码拆分，按需加载代码，避免了下载不需要的代码，减少了初始加载期间所需的代码量
+   * 为何不使用React.lazy() ? lazy只适用于client端，服务器渲染不适用
    * @returns
    */
   generateRoutesCode(ssr: boolean) {

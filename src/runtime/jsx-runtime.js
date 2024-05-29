@@ -1,7 +1,9 @@
 import * as jsxRuntime from 'react/jsx-runtime';
 
 export const data = {
+  // 用来记录 Islands 组件的props数据
   rpressProps: [],
+  // 用来记录 Island 组件的路径信息
   rpressToPathMap: {}
 };
 
@@ -16,6 +18,7 @@ const internalJsx = (jsx, type, props, ...args) => {
     data.rpressProps.push(props);
     const id = type.name;
     data['rpressToPathMap'][id] = props.__rpress;
+    // console.log(props.__rpress)
 
     delete props.__rpress;
     return jsx('div', {

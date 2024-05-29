@@ -15,7 +15,7 @@ export function useHeaders(initHeaders: Header[]) {
 
         import(/* @vite-ignore */ `${path}?import&t=${Date.now()}`).then(
           (module) => {
-            console.log(module);
+            // console.log(module);
             setHeaders(module.toc);
           }
         );

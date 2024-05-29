@@ -6,10 +6,22 @@ import { PageData, UserConfig } from 'shared/types';
 import siteData from 'rpress:site-data';
 
 export async function initPageData(routePath: string): Promise<PageData> {
+  /** routes:
+    export const routes = [
+      { path: '/Counter', element: React.createElement(Route0), preload: () => import('D:/font/mydemo/ReactPress/docs/Counter.tsx') },
+      { path: '/guide/a', element: React.createElement(Route1), preload: () => import('D:/font/mydemo/ReactPress/docs/guide/a.jsx') },
+    ];
+ */
+  // 匹配相应的路由
   const matched = matchRoutes(routes, routePath);
   if (matched) {
     const route = matched[0].route as Route;
     // 获取路由组件编译后的模块内容
+    /**
+     *  default: ...
+        frontmatter: ...
+        toc: [...]
+     */
     const moduleInfo = await route.preload();
     // console.log(moduleInfo)
     return {
@@ -18,7 +30,7 @@ export async function initPageData(routePath: string): Promise<PageData> {
       frontmatter: moduleInfo.frontmatter ?? {},
       pagePath: routePath,
       toc: moduleInfo?.toc ?? [],
-      title: moduleInfo.title
+      title: moduleInfo.title || 'Rpress'
     };
   }
   return {

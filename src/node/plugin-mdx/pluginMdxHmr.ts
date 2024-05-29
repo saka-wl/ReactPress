@@ -11,9 +11,11 @@ export function pluginMdxHMR(): Plugin {
         (plugin) => plugin.name === 'vite:react-babel'
       ) as Plugin;
     },
+    // 添加热更新配置
     async transform(code, id, opts) {
       if (/\.mdx?$/.test(id)) {
         // Inject babel refresh template code by @vitejs/plugin-react
+        // 断言
         assert(typeof viteReactPlugin.transform === 'function');
         const result = await viteReactPlugin.transform?.call(
           this,
@@ -31,6 +33,7 @@ export function pluginMdxHMR(): Plugin {
         return result;
       }
     },
+    // 热更新配置
     handleHotUpdate(ctx) {
       // console.log(ctx.read())
       if (/\.mdx?/.test(ctx.file)) {

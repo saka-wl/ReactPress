@@ -68,6 +68,7 @@ export const remarkPluginToc: Plugin<[], Root> = () => {
       //   value: 'title'
       // }
       if (node.depth > 1 && node.depth < 5) {
+        // 获取到 value
         const originalText = (node.children as ChildNode[])
           .map((child) => {
             switch (child.type) {
@@ -80,6 +81,7 @@ export const remarkPluginToc: Plugin<[], Root> = () => {
           .join('');
         // A -> A
         // A -> A-1
+        // 唯一id处理
         const id = slugger.slug(originalText);
         toc.push({
           id,

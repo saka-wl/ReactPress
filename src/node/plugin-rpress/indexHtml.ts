@@ -9,6 +9,7 @@ export function pluginIndexHtml(): Plugin {
      * 在template.html中加入script标签，可以修改html内容，直接将client-entry入口文件引入
      * 但为何可以读取文件内容呢？因为加入了react插件
      * 介绍：https://juejin.cn/post/7210278786592292920#heading-3
+     * https://juejin.cn/post/7185164908885966907  about /@fs
      * @param html
      * @returns
      */

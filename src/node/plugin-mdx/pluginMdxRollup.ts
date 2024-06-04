@@ -1,3 +1,4 @@
+// https://mdxjs.com/packages/rollup/
 import pluginMdx from '@mdx-js/rollup';
 import type { Plugin } from 'vite';
 // 生成github风格的GFM(Markdown)
@@ -10,7 +11,7 @@ import remarkMdxFrontmatter from 'remark-mdx-frontmatter';
 import remarkFrontmatter from 'remark-frontmatter';
 import { rehypePluginPreWrapper } from './rehypePlugins/preWrapper';
 import { rehypePluginShiki } from './rehypePlugins/shiki';
-// https://shiki.style/guide/install
+// https://shiki.style/guide/install  添加高亮，荧光
 import shiki from 'shiki';
 import { remarkPluginToc } from './remarkPlugins/toc';
 

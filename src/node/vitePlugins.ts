@@ -20,7 +20,6 @@ export async function createVitePlugins(
   isSSR = false,
   isDev = true
 ) {
-  // console.log(path.join(PACKET_ROOT, 'src', 'runtime'))
   if (isDev) {
     return [
       pluginUnocss(unocssOptions),

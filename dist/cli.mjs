@@ -6,7 +6,7 @@ import {
   SERVER_ENTRY_PATH,
   createDevServer,
   createVitePlugins
-} from "./chunk-5VPSPOJT.mjs";
+} from "./chunk-3R3KD2EP.mjs";
 import {
   resolveConfig
 } from "./chunk-4J7KUVM4.mjs";
@@ -115,6 +115,8 @@ async function renderPage(render, root, clientBundle, routes) {
 <html>
   <head>
     <meta charset="utf-8">
+    <meta name="referrer" content="no-referrer" />
+    <link rel="shortcut icon" href="./rpress.png" type="image/x-icon">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     ${helmet?.title?.toString() || ""}
     ${helmet?.meta?.toString() || ""}

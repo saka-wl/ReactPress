@@ -86,6 +86,7 @@ export async function resolveConfig(
   command: 'serve' | 'build',
   mode: 'production' | 'development'
 ): Promise<SiteConfig> {
+  // 获取用户自定义配置
   const [configPath, userConfig] = await resolveUserConfig(root, command, mode);
   const siteConfig: SiteConfig = {
     root,

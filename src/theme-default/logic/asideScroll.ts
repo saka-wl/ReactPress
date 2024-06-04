@@ -3,7 +3,7 @@
 let links: HTMLAnchorElement[] = [];
 const NAV_HEIGHT = 56;
 
-export function throttle(Fn: () => void, delay = 100) {
+export function throttle(Fn: () => void, delay = 60) {
   let last = Date.now();
   let cur;
   return (...args) => {
@@ -56,11 +56,13 @@ export function bindingAsideScroll() {
     links = Array.from(
       document.querySelectorAll<HTMLAnchorElement>('.rpress-doc .header-anchor')
     ).filter((item) => item.parentElement?.tagName !== 'H1');
+    // 因为节流，可能会无法会得到底部的滚动距离
     const isBottom =
-      document.documentElement.scrollTop + window.innerHeight + 20 >=
+      document.documentElement.scrollTop + window.innerHeight + 70 >=
       document.documentElement.scrollHeight;
     // 1. 如果已经滑动到底部，我们将最后一个 link 高亮即可
     // console.log(document.documentElement.scrollTop + window.innerHeight, document.documentElement.scrollHeight)
+    // console.log(links[links.length - 1].getBoundingClientRect().top)
     if (isBottom) {
       activate(links, links.length - 1);
       return;
@@ -68,7 +70,7 @@ export function bindingAsideScroll() {
     for (let i = 0; i < links.length; i++) {
       const currentAnchor = links[i];
       const nextAnchor = links[i + 1];
-      const scrollTop = Math.ceil(window.scrollY);
+      const scrollTop = Math.ceil(window.scrollY) + NAV_HEIGHT + 2;
       const currentAnchorTop =
         currentAnchor.parentElement.offsetTop - NAV_HEIGHT;
       if (!nextAnchor) {
@@ -80,7 +82,8 @@ export function bindingAsideScroll() {
         break;
       }
       const nextAnchorTop = nextAnchor.parentElement.offsetTop - NAV_HEIGHT;
-      if (scrollTop >= currentAnchorTop && scrollTop < nextAnchorTop) {
+      if (scrollTop >= currentAnchorTop && scrollTop <= nextAnchorTop) {
+        // console.log(scrollTop, currentAnchorTop, nextAnchorTop)
         activate(links, i);
         break;
       }

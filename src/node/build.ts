@@ -146,6 +146,8 @@ export async function renderPage(
 <html>
   <head>
     <meta charset="utf-8">
+    <meta name="referrer" content="no-referrer" />
+    <link rel="shortcut icon" href="./rpress.png" type="image/x-icon">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     ${helmet?.title?.toString() || ''}
     ${helmet?.meta?.toString() || ''}

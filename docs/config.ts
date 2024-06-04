@@ -10,7 +10,7 @@ export default defineConfig({
             },
             {
                 text: "指南",
-                link: "/guide/"
+                link: "/guide"
             },
             {
                 text: "实现原理",
@@ -21,15 +21,57 @@ export default defineConfig({
         'sidebar': {
             '/theory': [
                 {
-                    text: '实现细节',
+                    text: 'Rpress架构',
                     items: [
                         {
-                            text: "关于",
-                            link: "/theory/a"
+                            text: "搭建脚手架",
+                            link: "/theory/theory_01_build"
                         },
                         {
-                            text: "关于2",
-                            link: "/theory/b"
+                            text: "关于Rpress系统架构",
+                            link: "/theory/theory_02_about"
+                        },
+                        {
+                            text: "简单复现 rpress dev",
+                            link: "/theory/theory_03_dev"
+                        },
+                        {
+                            text: "简单复现 rpress build",
+                            link: "/theory/theory_04_build"
+                        },
+                        {
+                            text: "hydrates组件的思想",
+                            link: "/theory/theory_05_hy"
+                        },
+                        {
+                            text: "hydrates组件如何实现",
+                            link: "/theory/theory_06_hy_create"
+                        }
+                    ]
+                },
+                {
+                    text: '获取路由数据',
+                    items: [
+                        {
+                            text: "关于路由",
+                            link: "/theory/theory_07_route"
+                        },
+                        {
+                            text: "关于用户自定义配置",
+                            link: "/theory/theory_08_config"
+                        }
+                    ]
+                },
+                {
+                    text: '获取tocs数据',
+                    items: [
+                        {
+                            text: "Mdx文件处理",
+                            link: "/theory/theory_09_mdxHandle"
+                        },
+                        {
+                            text: "获取Tocs",
+                            link: "/theory/theory_10_getTocs"
                         }
                     ]
                 }
@@ -39,16 +81,12 @@ export default defineConfig({
                     text: '教程',
                     items: [
                         {
-                            text: '快速上手',
-                            link: '/guide/a'
+                            text: '配置我们的Nav导航栏',
+                            link: '/guide/guide_01_navbar'
                         },
                         {
-                            text: '如何安装',
-                            link: '/guide/b'
-                        },
-                        {
-                            text: "注意事项",
-                            link: "/guide/c"
+                            text: '配置我们的侧边栏',
+                            link: '/guide/guide_02_siderbar'
                         }
                     ]
                 }

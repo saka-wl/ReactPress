@@ -57,7 +57,8 @@ async function buildRpress(root, rpressToPathMap) {
         async resolveId(id) {
           if (id.includes(MASK_SPLITTER)) {
             const [originId, importer] = id.split(MASK_SPLITTER);
-            return await this.resolve(originId, importer, { skipSelf: true });
+            const resp = await this.resolve(originId, importer, { skipSelf: true });
+            return resp;
           }
           if (id === injectId) {
             return id;

@@ -1,188 +1,130 @@
-## ReactPress
-
-`node`是`18.14.2`
-
-`Rpress`大纲
-程序的入口是`cli.ts`，有两种命令可以使用：`rpress dev [root]`与`rpress dev [root]`
-
-- 先讲讲`rpress dev [root]`，这是用来预览程序的，下面是实现方式：
-
-1. 先通过`cac`来识别`rpress dev [root]`命令，可以获取到`[root]`路径，然后通过`vite`的`createServer`方法来创建服务即可运行
-
-2. 在`createServer`中，可以放入几个插件（`pluginIndexHtml`，`pluginReact`，`pluginConfig`，`pluginRoutes`）
-    - `pluginReact`能够配置`react`局部热更新与`react`内的标签
-
-    - `pluginConfig`能够读取用户写的配置文件和当配置修改时热更新重启服务
-
-        - 配置是指用户自己配置的`defineConfig`，能够传给网页中；
-        - 那么如何获取到用户配置文件呢？先遍历目标文件夹找出配置文件，再通过`vite` 的`loadConfigFromFile`方法来获取文件内容
-        - 那么如何来解决配置文件更新时，重启服务呢？早在`cli.ts`入口文件中就加入了`restart`的方法，然后一直透传到配置文件模块，最后在`handleHotUpdate`钩子处来判断是否重启服务
-
-    - `pluginRoutes`插件可以获取到用户配置的路由信息
-
-        - 如何准确确定哪些文件需要路由处理呢？先获取路由的根文件夹，然后使用`FastGlob`库来查找一些目标文件，比如：`['**/*.{js,jsx,ts,tsx,md,mdx}']`的文件
-
-        - 获取到文件信息之后，将得到的信息拼接为`esm`形式的字符串，在`load`时返回出去，这样我们就可以在下面的操作时获取到该信息
-
-          信息格式：
-
-          ```js
-          import React from 'react';
-          import loadable from "@loadable/component";
-          const Route0 = loadable(() => import('D:/font/mydemo/ReactPress/docs/Counter.tsx'));
-          const Route1 = loadable(() => import('D:/font/mydemo/ReactPress/docs/guide/a.jsx'));
-          export const routes = [
-              { path: '/Counter', element: React.createElement(Route0), preload: () => import('D:/font/mydemo/ReactPress/docs/Counter.tsx') },
-              { path: '/guide/a', element: React.createElement(Route1), preload: () => import('D:/font/mydemo/ReactPress/docs/guide/a.jsx') },
-          ];
-          ```
-
-          在其中，我们使用 @loadable/component 包中的`loadable`实现了代码拆分，按需加载代码，避免了下载不需要的代码，减少了初始加载期间所需的代码量
-
-        - 下面我们可以这样获取数据
-
-          ```js
-          import { routes } from 'rpress:routes';
-          routes: RouteObject[] = [
-              {
-                  path: '/',
-                  element: {
-                      '$$typeof': Symbol(react.element),
-                      type: [Function: MDXContent],
-                      key: null,
-                      ref: null,
-                      props: {},
-                      _owner: null
-                  },
-                  preload: [Function: preload]
-              }...
-          ]
-          ```
-
-        - 接下来是如何使用这些数据，使用`react-router-dom`中的`matchRoutes`方法来匹配路由，如果匹配到了就使用上文提供的`preload`方法来动态加载路由获取相应的路由`html`代码
-
-    - `pluginIndexHtml`插件则是`rpress dev [root]`专用的来添加开发预览服务的，会以`client-entry`为入口然后运行`react` 文件
-
-    - `createMdxPlugins`，该插件是来将`.md`等文件转换为`html`的代码，插件主要由`@mdx-js/rollup`的`pluginMdx`函数来集成，
-
-        分为`remarkPlugins`和`rehypePlugins`插件配置
-
-        - `remarkPlugins`中，使用了`remarkPluginGFM`来生成`github`风格的`GFM(Markdown)`；使用了`remarkFrontmatter`来解析`mdx`文档信息；使用了`remarkMdxFrontmatter`来收集元信息；使用了`remarkPluginToc`来处理标题部分
-
-          - `remarkMdxFrontmatter`插件会将收集到的主页面的页面（最上层`doc`文件夹的`index.mdx`）元信息导出
-          - `remarkPluginToc`插件中，使用`visit`的方式来遍历`mdx`文档，然后选择符合规范的标题类型数据加入到`toc`数组中并且导出，比如：
-
-            ```md
-            ---
-            name: saka-wl
-            ---
-            # Hello
-            ## from {frontmatter.name}
-            ## this is toc - 01
-            ### this is toc - 01-01
-            ## this is toc - 02
-            ```
-
-            ```js
-            export const frontmatter = {
-              "name": "saka-wl"
-            };
-            export const toc = [{
-              "id": "from-frontmattername",
-              "text": "from frontmatter.name",
-              "depth": 2
-            }, {
-              "id": "this-is-toc---01",
-              "text": "this is toc - 01",
-              "depth": 2
-            }];
-            export const title = 'Hello';
-            ```
-
-        - `rehypePlugins`中，使用了`rehypePluginSlug`来添加元素的`id`属性；使用了`rehypePluginAutolinkHeadings`来生成锚点信息和跳转链接；使用了`rehypePluginPreWrapper`来添加语言类型标签；使用了`rehypePluginShiki`来添加代码块高亮
-
-        - `rehypePluginPreWrapper`插件是来处理代码块的，将原本的代码块类型代码中添加代码的类型
-
-          ```html
-          <pre>
-             <code class="language-js">console.log(123);</code>
-          </pre>
-          -->>
-          <div class="language-js">
-             <span class="lang">js</span>
-             <pre>
-                <code class="">console.log(123);</code>
-             </pre>
-          </div>
-          ```
-
-    - `pluginMdxHMR`中，利用`react-refresh`配置了`.mdx`文件的热更新
-
-3. 我们也在程序中实现了约定式路由，先在`config.ts`中约定`Nav`组件中有哪些路由跳转，以及相应的侧边栏路由跳转，然后通过`pluginConfig`用户自定义插件将配置传给相应的组件
-
-
-
-- 然后讲讲`rpress dev [root]`的实现，用来打包程序的，下面是实现方式：
-
-1. 先通过`cac`来识别`rpress build [root]`命令，可以获取到`[root]`路径
-
-2. 然后加入运行上述的插件
-
-3. 接下来就要进行打包操作，分为浏览器端`client-entry`和服务器端`ssr-entry`，服务器端打包的文件只会在服务器进行运行，进行一些浏览器端路由生成等操作，不会上传到浏览器端，等浏览器端文件打包完成，我们完全可以删除服务器端文件
-
-   - 浏览器端打包：我们先从`client-entry`入口进入，然后进行打包，会得到一个`RollupOutput`类型的文件里面包含了浏览器端文件的`js`逻辑代码，我们将这些`js`文件打包在了`assets`文件夹中
-
-     <img src="C:\Users\aywzc\AppData\Roaming\Typora\typora-user-images\image-20240513110154829.png" alt="image-20240513110154829" style="zoom: 80%;" />
-
-   - 服务器端打包：我们先从`ssr-entry`入口进入，然后进行打包，会得到`render`与`routes`（用户自己创建的路由），用来渲染路由文件与确认有哪些路由
-
-   - 接下来会将所有的路由文件依次添加到`html`模板中，包括`html`代码和`js`逻辑，然后生成文件
-
-   ![image-20240513110229087](C:\Users\aywzc\AppData\Roaming\Typora\typora-user-images\image-20240513110229087.png)
-
-   
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+首先拉去到我们的项目
+
+> [https://github.com/saka-wl/ReactPress](https://github.com/saka-wl/ReactPress)
+
+注意，我们的node版本使用的是`18.14.2`
+
+1. `npm i pnpm`下载`pnpm`管理包
+2. `pnpm i`下载依赖
+3. 使用`npm link --force`将`cac`脚本链接到全局
+
+接下来，我们可以新建一个文件夹，在文件夹下
+
+1. 先写配置文件`config.ts`，下面是配置是格式
+
+```typescript
+import { defineConfig } from "../dist"
+
+export default defineConfig({
+    'description': "",
+    'themeConfig': {
+        'nav': [
+            {
+                text: "主页",
+                link: "/"
+            },
+            {
+                text: "指南",
+                link: "/guide/"
+            },
+            {
+                text: "实现原理",
+                link: "/theory"
+            }
+        ],
+        'sidebar': {
+            '/theory': [
+                {
+                    text: 'Rpress架构',
+                    items: [
+                        {
+                            text: "搭建脚手架",
+                            link: "/theory/theory_01_build"
+                        }
+                    ]
+                },
+                {
+                    text: '获取路由数据',
+                    items: [
+                        {
+                            text: "关于路由",
+                            link: "/theory/theory_07_route"
+                        },
+                        {
+                            text: "关于用户自定义配置",
+                            link: "/theory/theory_08_config"
+                        }
+                    ]
+                }
+            ],
+            '/guide': [...]
+        },
+    },
+    'title': 'SAKA_WL',
+    'vite': {}
+})
+```
+
+2. 处理路由页面
+
+配置完成以后，我们就需要创建相应的路由页面
+首先是`home`页面（`index.mdx`），里面书写了一些主要元信息，我们的应用可以根据元信息来渲染页面
+
+```markdown
+---
+pageType: home
+
+hero:
+  name: Rpress
+  text: 基于 Vite + MDX 语法的静态站点生成器
+  tagline: 简单、强大、高性能的现代化 SSG 方案
+  image:
+    src: /rpress.png
+    alt: Rpress
+  actions:
+    - theme: brand
+      text: 快速开始
+      link: /zh/guide/getting-started
+    - theme: alt
+      text: GitHub 地址
+      link: https://github.com/saka-wl/reactpress
+
+features:
+  - title: 'Vite: 极速的开发响应速度'
+    details: 基于 Vite 构建，开发时的响应速度极快，即时的热更新，带给你极致的开发体验。
+    icon: 🚀
+  - title: 'MDX: Markdown & React 组件来写内容'
+    details: MDX 是一种强大的方式来写内容。你可以在 Markdown 中使用 React 组件。
+    icon: 📦
+  - title: '孤岛架构: 更高的生产性能'
+    details: 采用 Rpress 架构，意味着更少的 JavaScript 代码、局部 hydration， 从而带来更好的首屏性能。
+    icon: ✨
+  - title: '功能丰富: 一站式解决方案'
+    details: 对全文搜索、国际化等常见功能可以做到开箱即用。
+    icon: 🛠️
+  - title: 'TypeScript: 优秀的类型支持'
+    details: 使用 TypeScript 编写，提供了优秀的类型支持，让你的开发更加顺畅。
+    icon: 🔑
+  - title: '扩展性强: 提供多种自定义能力'
+    details: 通过其扩展机制，你可以轻松的扩展 Rpress 的主题 UI 和构建能力。
+    icon: 🎨
+---
+```
+
+然后我们就需要对应配置的路由书写相应的路由页面（可以是`jsx`或者`mdx`类型）
+![image.png](https://cdn.nlark.com/yuque/0/2024/png/34286503/1717486262391-f090980e-66d8-41de-8802-0c8f81bdc88b.png#averageHue=%2325282d&clientId=u209c4f0f-8b64-4&from=paste&height=381&id=u6d5c6126&originHeight=572&originWidth=383&originalType=binary&ratio=1.5&rotation=0&showTitle=false&size=41584&status=done&style=none&taskId=u3dd8e9e7-2b96-4ed9-9811-bf4e52d9ad4&title=&width=255.33333333333334)
+
+3. 处理公共资源
+
+我们将一些需要引用的图片放在`public`文件夹里面
+
+## 预览模式
+
+我们完成以上的配置以后就可以通过`rpress dev [root]`来进行预览（`root`为刚刚创建的文件夹名字）
+在预览模式中，里面支持文件的热加载
+
+## 打包模式
+
+打包模式首先要运行`pnpm run build:deps`来将一些依赖打包（防止react多依赖打包问题）
+然后就可以通过`rpress build [root]`命令来打包
+打包完成以后，我们可以通过

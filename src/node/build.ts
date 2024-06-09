@@ -66,9 +66,13 @@ async function buildRpress(
         enforce: 'post',
         // rpress:inject../../components/Aside/index!!RPRESS!!D:/font/mydemo/ReactPress/src/theme-default/Layout/DocLayout/index.tsx
         async resolveId(id) {
+          // console.log(id)
           if (id.includes(MASK_SPLITTER)) {
             const [originId, importer] = id.split(MASK_SPLITTER);
-            return await this.resolve(originId, importer, { skipSelf: true });
+            const resp = await this.resolve(originId, importer, {
+              skipSelf: true
+            });
+            return resp;
           }
 
           if (id === injectId) {
@@ -108,7 +112,7 @@ export async function renderPage(
 ) {
   console.log('Rendering page in server side...');
   fs.existsSync(join(root, '.temp')) && (await fs.remove(join(root, '.temp')));
-  // clientBundle中是一些依赖包和逻辑的打包结果
+  // clientBundle中是一些依赖包的打包结果
   const clientChunk = clientBundle.output.find(
     (chunk) => chunk.type === 'chunk' && chunk.isEntry
   );

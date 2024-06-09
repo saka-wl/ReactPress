@@ -3,7 +3,7 @@
 
 esm-cjs
 
-dist
+**/dist/**
 
 docs
 

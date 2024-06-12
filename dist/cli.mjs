@@ -6,10 +6,10 @@ import {
   SERVER_ENTRY_PATH,
   createDevServer,
   createVitePlugins
-} from "./chunk-3R3KD2EP.mjs";
+} from "./chunk-74452F2U.mjs";
 import {
   resolveConfig
-} from "./chunk-4J7KUVM4.mjs";
+} from "./chunk-FT4M4DY2.mjs";
 
 // src/node/cli.ts
 import cac from "cac";
@@ -57,7 +57,9 @@ async function buildRpress(root, rpressToPathMap) {
         async resolveId(id) {
           if (id.includes(MASK_SPLITTER)) {
             const [originId, importer] = id.split(MASK_SPLITTER);
-            const resp = await this.resolve(originId, importer, { skipSelf: true });
+            const resp = await this.resolve(originId, importer, {
+              skipSelf: true
+            });
             return resp;
           }
           if (id === injectId) {

@@ -1,0 +1,28 @@
+![image.png](https://cdn.nlark.com/yuque/0/2024/png/34286503/1716802113165-0f976414-628a-441a-b41c-dbead0109498.png#averageHue=%23252424&clientId=ua438c597-8884-4&from=paste&height=477&id=u6ca439f9&originHeight=1411&originWidth=2477&originalType=binary&ratio=1.5&rotation=0&showTitle=false&size=254148&status=done&style=none&taskId=ue1c0d8b8-a88d-49b1-a398-9366aef6946&title=&width=837.3333740234375)
+首先我们这个系统架构里面分为两种组件，可交互组件和不可交互组件，不可交互组件就是指这种静态的一些页面，没有点击滚动等效果的页面，比如：
+![image.png](https://cdn.nlark.com/yuque/0/2024/png/34286503/1716802123882-1fec2bb3-a9e0-44eb-a807-e2358407a606.png#averageHue=%23c6ae84&clientId=ua438c597-8884-4&from=paste&height=485&id=uc775876a&originHeight=1333&originWidth=1470&originalType=binary&ratio=1.5&rotation=0&showTitle=false&size=190558&status=done&style=none&taskId=u9e09dbda-412b-49b5-b02b-6fd348669a8&title=&width=534.3333435058594)
+然后就是不可交互组件，就是指有滚动事件，点击事件等页面，比如：（该页面会随着页面的滚动，绿色标签也会滚动，有一个交互效果）
+![image.png](https://cdn.nlark.com/yuque/0/2024/png/34286503/1716802220022-55c2def2-4bf7-4680-9f72-eb7a5d2293c2.png#averageHue=%232b2b2b&clientId=ua438c597-8884-4&from=paste&height=397&id=u0ecb2eb3&originHeight=596&originWidth=255&originalType=binary&ratio=1.5&rotation=0&showTitle=false&size=21029&status=done&style=none&taskId=u6ab1330d-6d2a-4ab5-a602-62deb27d009&title=&width=170)
+我们首先先获取整体页面的一个HTML CSS代代码，然后给用户呈现出来，对于不可交互组件，它的组件渲染就已经完成了，因为它不需要一个进行事件绑定（hydrateRoot）的过程，这样做加快了一个页面的首屏加载时间，也不需要下载多余的hydrateRoot代码
+然后对于可交互的组件，当他的html css渲染完成以后，我们还需要进行一个事件绑定hydrateRoot的过程。我们先获取到所有需要事件绑定的组件（比如下面带有__rpress的组件）
+![image.png](https://cdn.nlark.com/yuque/0/2024/png/34286503/1716802481035-0227eb93-9f16-480f-ac19-1173860e67e1.png#averageHue=%23957f50&clientId=ua438c597-8884-4&from=paste&height=73&id=u1be1490d&originHeight=70&originWidth=262&originalType=binary&ratio=1.5&rotation=0&showTitle=false&size=4814&status=done&style=none&taskId=u479c7fbb-0192-4179-9f9e-fcab522846e&title=&width=273.6666717529297)
+然后下面的Js中会存在一个hydrateRoot的逻辑
+![image.png](https://cdn.nlark.com/yuque/0/2024/png/34286503/1716802545587-53e7c98b-4ae1-499a-9f8a-01d369bbf4fe.png#averageHue=%233d4349&clientId=ua438c597-8884-4&from=paste&height=222&id=ud088bdf7&originHeight=444&originWidth=1992&originalType=binary&ratio=1.5&rotation=0&showTitle=false&size=212779&status=done&style=none&taskId=u1f143510-9396-43b8-bbfb-1023d8ebdf9&title=&width=997.3333740234375)
+以及该组件的props
+![image.png](https://cdn.nlark.com/yuque/0/2024/png/34286503/1716802575254-136dad16-32ba-443e-bbb1-65e265e66468.png#averageHue=%23362f2c&clientId=ua438c597-8884-4&from=paste&height=85&id=u095650ce&originHeight=128&originWidth=1994&originalType=binary&ratio=1.5&rotation=0&showTitle=false&size=31511&status=done&style=none&taskId=ue8ddc25c-9c23-41e8-98ba-3fa243f05ea&title=&width=1329.3333333333333)
+然后浏览器就会完成事件绑定
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

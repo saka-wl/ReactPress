@@ -1,0 +1,36 @@
+下面我们来讲解以下如何根据mdx文件中的内容来获取tocs，下面就是tocs
+![image.png](https://cdn.nlark.com/yuque/0/2024/png/34286503/1717393099260-74e3846a-a3a5-486c-81fd-9bea10828a09.png#averageHue=%23fafafa&clientId=u520fa222-8991-4&from=paste&height=541&id=u681c18a1&originHeight=812&originWidth=311&originalType=binary&ratio=1.5&rotation=0&showTitle=false&size=30058&status=done&style=none&taskId=u00584cf5-4457-4fdf-ae40-16383f87d3d&title=&width=207.33333333333334)
+获取方式：
+先遍历获取mdx内容中所有符合条件的标题（h1，title）与tocs（h2-h5，tocs），然后把这些信息都放入到mdx的元信息中
+```javascript
+tree.children.push({
+  type: 'mdxjsEsm',
+  value: inserted,
+  data: {
+    estree: parse(inserted, {
+      ecmaVersion: 2020,
+      sourceType: 'module'
+    })
+  }
+} as MdxjsEsm);
+```
+我们就可以在后面通过导入的方式获取到这些信息
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

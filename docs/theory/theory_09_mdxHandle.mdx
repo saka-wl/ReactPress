@@ -1,0 +1,86 @@
+我们会先获取到所有符合页面路由的文件，然后会把这些文件都交给createMdxPlugins插件来转换为jsx
+我们是如何将mdx文件转换为html文件的呢？
+这也是通过我们的自定义插件createMdxPlugins来实现的
+首先，我们基本上是通过`@mdx-js/rollup`插件来实现的，先讲一下这个插件能干什么？
+我们通过`@mdx-js/mdx`的node操作来复现`@mdx-js/rollup`的操作
+```javascript
+import fs from 'node:fs/promises'
+import { join } from 'node:path'
+
+let dy = new Function('m', "return import(m)")
+
+async function test() {
+    let { compile } = await dy("@mdx-js/mdx")
+    const compiled = await compile(await fs.readFile(join(__dirname, "../Mdx/a.mdx")))
+    await fs.writeFile(join(__dirname, "../Mdx/a.js"), String(compiled))
+}
+
+test()
+```
+```markdown
+export const Thing = () => (<>World!</>)
+
+# Hello, <Thing />
+```
+->
+```jsx
+import {Fragment as _Fragment, jsx as _jsx, jsxs as _jsxs} from "react/jsx-runtime";
+export const Thing = () => _jsx(_Fragment, {
+  children: "World!"
+});
+function _createMdxContent(props) {
+  const _components = {
+    h1: "h1",
+    ...props.components
+  };
+  return _jsxs(_components.h1, {
+    children: ["Hello, ", _jsx(Thing, {})]
+  });
+}
+export default function MDXContent(props = {}) {
+  const {wrapper: MDXLayout} = props.components || ({});
+  return MDXLayout ? _jsx(MDXLayout, {
+    ...props,
+    children: _jsx(_createMdxContent, {
+      ...props
+    })
+  }) : _createMdxContent(props);
+}
+
+```
+所以，`@mdx-js/rollup`插件的操作大致是将mdx文件转换为jsx类型的文件，我们项目中的转换方式也是使用这个插件，转换为jsx文件之后，我们在后续会通过renderToString API来将jsx代码转换为html代码
+
+在里面我们还可以配置导出的元信息（remarkMdxFrontmatter），也就是home组件中的一些组件信息
+
+在里面，我们还需要将代码块的html格式修改一下，这里面实现方法是在里面加了一个插件 rehypePluginPreWrapper
+```jsx
+<pre>
+    <code class="language-js"> console.log(123); </code>
+</pre>
+ ->
+<div class="language-js">
+    <span class="lang"> js</span>
+    <pre>
+          <code class=""> console.log(123);</code>
+    </pre>
+</div>
+```
+rehypePluginPreWrapper 插件大致通过遍历当前所有dom，然后找到符合的，再修改里面的html
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

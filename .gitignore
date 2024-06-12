@@ -5,7 +5,7 @@ esm-cjs
 
 **/dist/**
 
-docs
+/docs/build
 
 vendors
 

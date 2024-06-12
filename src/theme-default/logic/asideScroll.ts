@@ -33,7 +33,9 @@ export function scrollToTarget(target: HTMLElement, isSmooth: boolean) {
 }
 
 export function bindingAsideScroll() {
+  // 激活的绿色div
   const marker = document.querySelector<HTMLAnchorElement>('#aside-marker');
+  // Aside总体div
   const aside = document.querySelector('#aside-container');
   // 规范化获取hash
   const headers = Array.from(aside?.getElementsByTagName('a') || []).map(

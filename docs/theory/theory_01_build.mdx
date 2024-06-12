@@ -1,0 +1,46 @@
+脚手架使用`CAC`
+书写`bin`字段
+在`packet.json`中
+```json
+"bin": {
+  "rpress": "bin/rpress.js"
+}
+```
+在`/bin/rpress.js`中
+```javascript
+#!/usr/bin/env node
+require("../dist/node/cli.js");
+```
+在`cli.ts`中
+```typescript
+import cac from "cac";
+
+const cli = cac("rpress").version("0.0.1").help()
+
+cli.command("dev [root]", "start dev server").action(async (root: String) => {
+    console.log("dev: " + root)
+})
+
+cli.command("build [root]", "build in production").action(async (root: String) => {
+    console.log("dev: " + root)
+})
+
+cli.parse()
+```
+然后`pnpm link`链接到全局
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

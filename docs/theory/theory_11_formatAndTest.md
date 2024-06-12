@@ -1,0 +1,188 @@
+该项目中，为了规范化的开发，我们使用了`eslint`，`husky`，`vitest`等依赖
+首先是对于`eslint`，我们的项目中，eslint与prettier一起使用，下面先安装依赖
+> pnpm i eslint eslint-plugin-react eslint-plugin-react-hooks @typescript-eslint/parser @typescript-eslint/eslint-plugin -D
+
+> pnpm i prettier eslint-plugin-prettier eslint-config-prettier
+
+## eslint
+安装完成之后，我们配置.eslintrc.cjs配置文件
+```javascript
+module.exports = {
+  root: true,
+  env: { browser: true, es2020: true },
+  extends: [
+    'eslint:recommended',
+    'plugin:@typescript-eslint/recommended',
+    'plugin:react-hooks/recommended',
+  ],
+  ignorePatterns: ['dist', '.eslintrc.cjs'],
+  parser: '@typescript-eslint/parser',
+  plugins: ['react-refresh'],
+  rules: {
+    'react-refresh/only-export-components': [
+      'warn',
+      { allowConstantExport: true },
+    ],
+  },
+}
+```
+接下来，我们会排除一些不需要的文件，写在了.eslintignore文件中
+```
+.eslintrc.cjs
+node_modules
+package.json
+pnpm-lock.yaml
+dist
+bin
+esm-cjs
+docs
+```
+然后，我们配置prettier，首先是.prettierrc.json文件
+```json
+{
+  "semi": true,
+  "singleQuote": true,
+  "printWidth": 80,
+  "trailingComma": "none"
+}
+```
+然后是.prettierignore文件
+```
+.eslintrc.cjs
+node_modules
+package.json
+pnpm-lock.yaml
+dist
+bin
+esm-cjs
+docs
+.prettierrc.json
+README.md
+vite.config.ts
+tsconfig.node.json
+tsconfig.json
+```
+然后，我们就可以在packet.json中配置eslint的自动修复命令
+```json
+"lint": "eslint --fix --ext .ts,.tsx,.js,.jsx --quiet ./ & prettier . --write"
+```
+至此，我们就完成了代码的格式化工作，我们可以通过`pnpm lint`命令来格式化代码
+## husky
+接下来，我们要配置husky来在git提交代码时自动格式化代码
+先来添加依赖
+> pnpm i husky -D
+
+> pnpm i commitlint @commitlint/cli @commitlint/config-conventional -D
+
+然后我们来初始化husky，即执行下面的脚本
+> npx husky install
+
+下面我们来挂载pre-commit的执行事件
+> npx husky add .husky/pre-commit "npm run lint"
+
+然后我们在packet.json中添加脚本命令，有了该命令，我们在pnpm i之后会直接下载husky
+> "prepare": "husky install"
+
+然后，我们在.commitlintrc.cjs文件中配置
+```javascript
+module.exports = {
+  extends: ['@commitlint/config-conventional']
+}
+```
+然后执行以下脚本
+> npx husky add .husky/commit-msg "npx --no-install commitlint --edit \"$1\""
+
+至此，我们git提交时，如果commit信息不规范，就会有报错产生
+但是，我们发现，我们提交时还是会有全量的代码检查，这会有些耗时，所以，我们使用lint-staged依赖来仅仅对新增的文件内容进行检查即可
+首先添加依赖
+> pnpm i lint-staged -D
+
+然后到package.json中新增一些内容
+```json
+"lint-staged": {
+  "**/*.{js,jsx,tsx,ts}": [
+    "eslint --fix"
+  ]
+},
+"scripts": {
+}
+```
+接着进入 .husky/pre-commit 脚本中，修改一下其中的内容
+```javascript
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/husky.sh"
+
+npx --no -- lint-staged
+```
+至此，我们完成了husky的配置
+## vitest
+这是一个测试的依赖
+首先，下载依赖
+> pnpm i vitest -D
+
+然后，在`vitest.config.ts`中进行配置
+```javascript
+import { defineConfig } from 'vitest/config';
+
+export default defineConfig({
+  test: {
+    environment: 'node',
+    passWithNoTests: true,
+    exclude: ['**/node_modules/**', '**/dist/**'],
+    threads: true
+  }
+});
+```
+然后在packet.json中新增脚本
+```json
+{
+  "test:init": "vitest run"
+}
+```
+下面是测试的一些语法
+```javascript
+import { expect, test, describe } from 'vitest';
+
+describe('Markdown compile cases', () => {
+  // 初始化 processor
+  const processor = unified()
+    .use(remarkParse)
+    .use(remarkRehype)
+    .use(rehypeStringify);
+  test('Compile title', async () => {
+    const mdContent = '# 123';
+    const result = processor.processSync(mdContent);
+    expect(result.value).toMatchInlineSnapshot('"<h1>123</h1>"');
+  });
+  test('Compile code', async () => {
+    const mdContent = 'I am using `Island.js`';
+    const result = processor.processSync(mdContent);
+    expect(result.value).toMatchInlineSnapshot(
+      '"<p>I am using <code>Island.js</code></p>"'
+    );
+  });
+});
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

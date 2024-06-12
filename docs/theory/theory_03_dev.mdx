@@ -1,0 +1,105 @@
+> 干了什么？使用vite启动了一个可预览的服务
+
+在我们的项目中，主要使用了vite的`createServer`服务
+下面我们来简单复现一下rpress的dev服务（简单的demo）
+先用cac实现服务的命令
+```javascript
+import cac from "cac";
+import { Plugin, build, createServer } from "vite"
+import pluginReact from "@vitejs/plugin-react"
+import { join } from "path";
+
+const cli = cac('vp').version('0.0.1').help();
+
+cli.command("dev [root]", "build in production").action(async (root, opts) => {
+  const serve = await createServer({
+    root: join(__dirname, ".."),
+    plugins: [
+      pluginReact(),
+      pluginIndexHtml()
+    ]
+  })
+  await serve.listen()
+  serve.printUrls()
+})
+
+cli.parse()
+```
+然后就是`pluginIndexHtml`插件的实现逻辑
+```javascript
+function pluginIndexHtml(): Plugin {
+  return {
+    name: "vp:serve",
+    transformIndexHtml(html) {
+      return {
+        html,
+        tags: [
+          {
+            tag: 'script',
+            attrs: {
+              type: 'module',
+              src: `/@fs/${join(__dirname, "../src/reacts/App.tsx")}`
+            },
+            injectTo: 'body'
+          }
+        ]
+      };
+    },
+    configureServer(server) {
+      return () => {
+        server.middlewares.use(async (req, res) => {
+          // 1. 读取template.html内容
+          let content = `<!DOCTYPE html>
+          <html lang="en">
+          <head>
+              <meta charset="UTF-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              <title>Document</title>
+          </head>
+          <body>
+              <div id="root"></div>
+          </body>
+          </html>`
+          content = await server.transformIndexHtml(
+            req.url,
+            content,
+            req.originalUrl
+          );
+          // 2. 通过整理的res对象响应给浏览器
+          res.setHeader('Content-Type', 'text/html');
+          res.end(content);
+        });
+      };
+    }
+  }
+}
+```
+下面有`client-ssr.tsx`中`react`渲染的逻辑，先回去页面中的id="root"的div，然后通过react在里面渲染（当前不含路由与全局数据）
+```jsx
+import { createRoot, render } from "react-dom"
+import { useState } from "react"
+
+function App() {
+    const [count, setCount] = useState(0)
+    return (
+        <div>
+            <p>count: {count}</p>
+            <button onClick={() => setCount(i => i + 1)}>add</button>
+        </div>
+    )
+}
+
+export default function renderApp() {
+    const root = document.querySelector("#root")
+    createRoot(root).render(
+        <App />
+    )
+}
+
+renderApp()
+```
+所以，在开发环境下，我们用的还是`react`的CSR模式
+
+
+
+

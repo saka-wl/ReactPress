@@ -1,0 +1,58 @@
+在我们的项目中，用户可以自定义配置路由，home页面等数据，这是如何实现的呢？
+首先，用户可以在文件夹书写config.ts配置，配置内容如下
+```javascript
+export default defineConfig({
+    'description': "",
+    'themeConfig': {
+        'nav': [
+            {
+                text: "主页",
+                link: "/"
+            }
+        ],
+        'sidebar': {
+            '/theory': [
+                {
+                    text: '实现细节',
+                    items: [
+                        {
+                            text: "关于",
+                            link: "/theory/a"
+                        }
+                    ]
+                }
+            ]
+        },
+    },
+    'title': 'SAKA_WL',
+    'vite': {}
+})
+```
+完成配置之后，就需要在打包时读取到这些配置，我们就需要通过vite插件来导出这些配置
+在vite打包启动时，我们先扫描用户自定义文件夹下面的配置文件（config.ts/js），然后通过vite的loadConfigFromFile API来读取文件里面的内容，然后将用户自定义配置传递给pluginConfig插件，再由插件导出里面的内容供给开发中使用
+```javascript
+import siteData from 'rpress:site-data';  // 在开发时使用用户自定义的配置
+```
+里面也包括对于路由的配置
+pluginRoutes插件会获取所有的路由页面，而pluginConfig则是用来配置路由规则（配置顶部栏和侧边栏的路由跳转规则）
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,46 @@
+如何将用户写的文件都转换为页面中的路由呢？
+首先，我们在服务器端写一个插件（pluginRoutes）来解析用户写的路由文件
+在这个插件中，我们先遍历用户的docs文件夹，将可以转换为路由页面的文件找出来，然后在这个插件中返回以下的数据
+```javascript
+import React from 'react';
+import loadable from "@loadable/component";
+const Route0 = loadable(() => import('D:/font/mydemo/ReactPress/docs/Counter.tsx'));
+const Route1 = loadable(() => import('D:/font/mydemo/ReactPress/docs/guide/a.jsx'));
+export const routes = [
+  { path: '/Counter', element: React.createElement(Route0), preload: () => import('D:/font/mydemo/ReactPress/docs/Counter.tsx') },
+  { path: '/guide/a', element: React.createElement(Route1), preload: () => import('D:/font/mydemo/ReactPress/docs/guide/a.jsx') },
+];
+```
+path为对应的路由页面的路径，preload则加载页面中的信息（pageData），element则是用来生产页面的（就是类似于reac-router的配置文件，只是加了一个preload来获取mdx页面信息）
+然后将这些数据作为插件的返回值，我们就可以在下面的过程中获取到这些路由数据
+首先是对于开发环境下，我们直接引用client-entry里面的逻辑，采用render的方式来说生成页面，在每一个页面中，我们会根据pageType来使用不同的组件渲染页面，如果是docs类型的页面我们就会采用element来生产页面
+
+但对于生产环境则不一样，生产环境要的是多个html页面，在页面html生成时（服务器生产html字符串时），我们需要通过StaticRouter 来生成单个html页面，我们会提供一个renderHtml函数来生产html字符串（renderToString API）
+```javascript
+const pageData = await initPageData(pagePath);
+const appHtml = renderToString(
+  // 新增 HelmetProvider 参数
+  <HelmetProvider context={helmetContext}>
+    <DataContext.Provider value={pageData}>
+      <StaticRouter location={pagePath}>
+        <App />
+      </StaticRouter>
+    </DataContext.Provider>
+  </HelmetProvider>
+);
+```
+pageData是什么？pageData是页面的数据，对于home页面，里面会存在一些数据，然后下面的组件通过这些数据进行渲染；对于docs页面，里面则是使用默认的数据，然后调用useRoutes API集中管理页面（根据页面路径解析页面）
+```jsx
+import { useRoutes } from 'react-router-dom';
+import { routes } from 'rpress:routes';
+
+export const Content = () => {
+  const routeElement = useRoutes(routes);
+  return routeElement;
+};
+
+<div className="rpress-doc">
+  <Content />
+</div>
+```
+我们在生产环境下打包时，需要使用开发环境下的代码（因为生产环境下的代码只有hydrateRoot的Js逻辑代码，没有css，以及一些依赖库的代码），我们会将开发环境下的css以及依赖代码打包完成供html页面使用，对于html代码自身的逻辑都写在了hydrateRoot的script标签里面

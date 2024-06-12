@@ -72,6 +72,23 @@ export default defineConfig({
                         {
                             text: "获取Tocs",
                             link: "/theory/theory_10_getTocs"
+                        },
+                        {
+                            text: '处理docs逻辑',
+                            link: '/theory/theory_13_handleDocsScroll'
+                        }
+                    ]
+                },
+                {
+                    text: "其他配置",
+                    items: [
+                        {
+                            text: "格式化与测试",
+                            link: '/theory/theory_11_formatAndTest'
+                        },
+                        {
+                            text: 'UnoCSS',
+                            link: '/theory/theory_12_UnoCSS'
                         }
                     ]
                 }

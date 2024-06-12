@@ -1,0 +1,44 @@
+以下思路是在build模式下
+我们规定像这种：`<div __rpress />`的组件为交互组件，他的逻辑处理与其他的非交互组件不同
+
+- 首先，我们在react的插件中自定义配置babel打包的一些操作，将带有__rpress标签的组件添加一些信息
+
+比如：`<div __rpress />` -> 
+`<div __rpress="`
+`../../components/Aside/index!!RPRESS!!D:/font/mydemo/ReactPress/src/theme-default/Layout/DocLayout/index.tsx`
+`" />`
+我们将一些路径数据添加在组件中
+
+- 然后我们在react运行时拦截带有rpress标签的组件，然后将数据的信息记录到全局变量中
+
+我们一般记录两个详细信息：
+
+1. 该组件的props数据（rpressProps）
+2. 该组件的路径信息（rpressToPathMap）
+
+最后我们需要将这种组件包裹在一个div并且id为rpress的标签下面
+
+- 将rpressProps与rpressToPathMap数据拼接到html中去
+
+![image.png](https://cdn.nlark.com/yuque/0/2024/png/34286503/1716733426358-2d10d89a-b62c-44f2-8c02-ac056e96eeed.png#averageHue=%232a2929&clientId=u277b9ff0-eb45-4&from=paste&height=493&id=u873c2df2&originHeight=739&originWidth=1042&originalType=binary&ratio=1.5&rotation=0&showTitle=false&size=45383&status=done&style=none&taskId=u4357ba49-ea14-49af-b074-6e32abcc017&title=&width=694.6666666666666)
+然后在浏览器渲染时，先获取id为rpress的组件，将每个可交互组件的props放入，然后使用react的`hydrateRoot`（`hydrateRoot`会在渲染的过程中，不创建 html 标签，而是直接关联已有的。这样就避免了没必要的渲染），给已经存在的html代码绑定标签
+```javascript
+const Element = window.RPRESS[id] as ComponentType<unknown>;
+hydrateRoot(rpress, <Element {...window.RPRESS_PROPS[index]} />);
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

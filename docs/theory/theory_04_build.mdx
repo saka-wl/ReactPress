@@ -1,0 +1,224 @@
+> 干了什么？将一个服务打包
+
+下面是组件中的代码：
+`App.tsx`
+```tsx
+export default function App() {
+    const [count, setCount] = useState(0)
+    const pageData = usePageData()
+    useEffect(() => {
+        const fn = () => {
+            console.log(111)
+        }
+        window.addEventListener('scroll', fn);
+        return () => {
+            window.removeEventListener('scroll', fn)
+        }
+    }, [])
+    return (
+        <div>
+            <p>this is App.jsx</p>
+            <div style={{ border: '1px solid red', height: '300px' }}>
+                <p>count_App.jsx: {count}</p>
+                <button onClick={() => setCount(i => i + 1)}>add</button>
+            </div>
+            <h1><a href="/a">go to page A</a></h1>
+            <h1><a href="/b">go to page B</a></h1>
+
+            <div>
+                <p>Routers</p>
+                {
+                    pageData === '/a' ? (<A />) : (<B />)
+                }
+            </div>
+        </div>
+    )
+}
+```
+`A.tsx`
+```tsx
+export default function A() {
+    const [count, setCount] = useState(0)
+    useEffect(() => {
+        const fn = () => {
+            console.log(111)
+        }
+        window.addEventListener('scroll', fn);
+        return () => {
+            window.removeEventListener('scroll', fn)
+        }
+    }, [])
+    return (
+        <div className="needHydrate">
+            <p>this is A.jsx hy</p>
+            <p>count_A: {count}</p>
+            <button onClick={() => setCount(i => i + 1)}>ADD</button>
+            <div style={{height: "300px", border: "1px solid red"}}></div>
+        </div>
+    )
+}
+```
+`B.tsx`
+```tsx
+export default function B() {
+    const [count, setCount] = useState(0)
+    useEffect(() => {
+        const fn = () => {
+            console.log(111)
+        }
+        window.addEventListener('scroll', fn);
+        return () => {
+            window.removeEventListener('scroll', fn)
+        }
+    }, [])
+    return (
+        <div>
+            <p>this is B Static</p>
+            <p>由于我们打包使用的是hydrateRoot，所有的绑定事件在B组件中都无效</p>
+            <p>count_B: {count}</p>
+            <button onClick={() => setCount(i => i + 1)}>ADD</button>
+            <div style={{height: "300px", border: "1px solid red"}}></div>
+        </div>
+    )
+}
+```
+
+下面是`server-ssr.ts`，主要是提供打包函数`renderServerApp`，你可以提供一个路由路径（比如`/a`），然后`StaticRouter`组件就会根据该路径将这个路径对应的页面转换为html字符串
+```javascript
+export default function renderServerApp(pathname: string) {
+    const html = renderToString(
+        <DataContext.Provider value={pathname}>
+            <StaticRouter location={pathname}>
+                <App />
+            </StaticRouter>
+        </DataContext.Provider>
+    )
+    return html
+}
+```
+下面是`client-ssr.ts`，下面的renderApp函数在开发环境下是直接使用react的render来给#root组件绑定react实例，从而添加交互
+然而在生产环境下，我们将组件分为可交互组件与不可交互组件；对于不可交互组件，其实就是一个静态的html，所以不需要向其提供hydrates（何为hydrates？就是给该组件绑定事件）；而对于可交互组件，我们就需要向其提供hydrates，比如说下面的A组件就是需要交互的组件
+实现的效果：对于App.tsx与B.tsx组件中，无法实现点击加一与滚动事件绑定的交互；而对于A.tsx中的代码就可以实现
+```javascript
+export default function renderApp() {
+    if (import.meta.env.DEV) {
+        const root = document.querySelector("#root")
+        createRoot(root).render(
+            <DataContext.Provider value={location.pathname}>
+                <BrowserRouter>
+                    <App />
+                </BrowserRouter>
+            </DataContext.Provider>
+        )
+    } else {
+        // 需要 hydrateRoot 的组件，简单实现
+        const needHydrates = document.querySelectorAll('.needHydrate')
+        for (let item of needHydrates) {
+            hydrateRoot(item, <A />)
+        }
+    }
+}
+
+renderApp()
+```
+下面是打包的命令，打包实际上是通过vite的build函数实现的，打包与dev预览不同，我们要获取到该页面整体的html代码（SSG模式），所以需要使用上面提供的renderServerApp方法来获取路由页面的html代码然后拼接到页面中，然而react等打包的代码和一些逻辑代码都会写在assets/client-ssr.js中；如果出现了多个路由页面，我们就会打包生成多个html页面，然后这些路由信息也会记录在assets/client-ssr.js与该页面对应的js文件中
+![image.png](https://cdn.nlark.com/yuque/0/2024/png/34286503/1716367945470-89482fce-befa-4eb6-a1ab-bfc1651f46bc.png#averageHue=%2327292a&clientId=ud91a43c8-c48b-4&from=paste&height=155&id=u92cb9e51&originHeight=232&originWidth=336&originalType=binary&ratio=1.5&rotation=0&showTitle=false&size=13797&status=done&style=none&taskId=ua8d04082-98c1-4b10-b49a-d2385a2cea2&title=&width=224)
+```javascript
+function viteBuild(root, filePath, isSSR): InlineConfig {
+  return {
+    mode: 'production',
+    root,
+    plugins: [pluginReact()],
+    ssr: {
+      // 注意加上这个配置，防止 cjs 产物中 require ESM 的产物，因为 react-router-dom 的产物为 ESM 格式
+      noExternal: ['react-router-dom']
+    },
+    build: {
+      ssr: isSSR,
+      // 输出产物目录
+      outDir: isSSR ? resolve(root, './.temp') : join(root, '../build'),
+      rollupOptions: {
+        input: filePath,
+        output: {
+          format: isSSR ? 'cjs' : 'esm'
+        }
+      }
+    }
+  }
+}
+
+cli.command("build [root]", "build in production").action(async (root, opts) => {
+  const [clientBundle, serverBundle] = await Promise.all([
+    build(viteBuild(root, join(__dirname, "../src/reacts/client-ssr"), false)),
+    build(viteBuild(root, join(__dirname, "../src/reacts/server-ssr"), true))
+  ])
+  const clientChunk = (clientBundle as RollupOutput).output.find(
+    (chunk) => chunk.type === 'chunk' && chunk.isEntry
+  );
+
+  // 这里为何要这样导入？
+  // 因为我们使用了tsup工程，我们导入的应该是打包完成之后的server-ssr.js，而非server-ssr.ts
+  const { default: renderServerApp } = await import(
+    pathToFileURL(join(root, '../docs/.temp/server-ssr.js')).toString()
+  )
+  async function makeHtml(pathname: string) {
+    const appHtml = renderServerApp(pathname)
+    const html = `
+    <!DOCTYPE html>
+  <html lang="en">
+  <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Document</title>
+  </head>
+  <body>
+      <div id="root">${appHtml}</div>
+      <script type="module" src="/${clientChunk?.fileName}"></script>
+  </body>
+  </html>`.trim()
+    let name = pathname.substring(1)
+    if(!name || name === '') {
+      name = 'index';
+    }
+    await fs.writeFile(join(root, "build", name + ".html"), html);
+  }
+  await Promise.all([makeHtml('/'), makeHtml('/a'), makeHtml('/b')])
+})
+```
+下面是预览打包结果
+```javascript
+cli.command("preview [root]", "preview in production").action(async (root, opts) => {
+  const dynamicImport = new Function('m', 'return import(m)');
+  const { default: express } = await dynamicImport("express")
+  const app = express();
+  const outputDir = resolve(root, "build");
+  // 静态资源服务
+  const serve = sirv(outputDir, {
+    etag: true,
+    maxAge: 31536000,
+    immutable: true,
+    setHeaders(res, pathname) {
+      if (pathname.endsWith('.html')) {
+        res.setHeader('Cache-Control', 'no-cache');
+      }
+    }
+  });
+
+  app.use(serve);
+
+  app.listen(3001, (err) => {
+    if (err) {
+      throw err;
+    }
+    console.log(
+      `> Preview server is running at http://localhost:3001`
+    );
+  });
+})
+```
+
+
+
+
+
+

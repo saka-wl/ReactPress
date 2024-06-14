@@ -39,6 +39,8 @@ cli
       root = resolve(root);
       fs.existsSync(join(root, 'build')) &&
         (await fs.remove(join(root, 'build')));
+      fs.existsSync(join(root, '.temp')) &&
+        (await fs.remove(join(root, '.temp')));
       const config = await resolveConfig(root, 'build', 'production');
       await build(root, config);
     } catch (err) {

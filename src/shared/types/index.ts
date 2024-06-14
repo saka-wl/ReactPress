@@ -36,6 +36,7 @@ export interface UserConfig {
   description: string;
   themeConfig: ThemeConfig;
   vite: ViteConfiguration;
+  github?: string;
 }
 
 export interface SiteConfig {

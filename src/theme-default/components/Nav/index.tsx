@@ -3,7 +3,7 @@ import { NavItemWithLink } from 'shared/types';
 import styles from './index.module.scss';
 import { SwitchAppearance } from '../SwitchAppearance';
 
-function MenuItem({ item }: { item: NavItemWithLink }) {
+function MenuItem({ item }: { item: NavItemWithLink; key: string }) {
   return (
     <div className="text-sm font-medium mx-3">
       <a href={item.link}>{item.text}</a>
@@ -14,6 +14,7 @@ function MenuItem({ item }: { item: NavItemWithLink }) {
 export function Nav() {
   const { siteData } = usePageData();
   const nav = siteData?.themeConfig?.nav || [];
+  const githubLink = siteData.github || 'https://github.com';
 
   return (
     <header fixed="~" pos="t-0 l-0" w="full" z="10">
@@ -47,7 +48,7 @@ export function Nav() {
             ml="1"
             before="menu-item-before"
           >
-            <a href="/">
+            <a href={githubLink}>
               <div className="i-carbon-logo-github w-5 h-5 fill-current"></div>
             </a>
           </div>

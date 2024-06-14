@@ -1,0 +1,93 @@
+[https://www.npmjs.com/package/react-helmet-async](https://www.npmjs.com/package/react-helmet-async)
+这是一个可以根据不同的页面提供不同的页面标签信息的插件
+![image.png](https://cdn.nlark.com/yuque/0/2024/png/34286503/1718246499708-23d4acc7-ef66-4387-8b40-773fc4f7a075.png#averageHue=%23a8c0c5&clientId=u68e57d2c-8cd1-4&from=paste&height=34&id=uc3dd8a5c&originHeight=51&originWidth=416&originalType=binary&ratio=1.5&rotation=0&showTitle=false&size=3010&status=done&style=none&taskId=u96de92eb-ee04-436e-b1c8-ffcc789f16a&title=&width=277.3333333333333)
+下面是使用过程
+首先安装插件
+> npm i react-helmet-async
+
+我们到client-ssr.tsx中引入 react-helmet-async:
+```jsx
+createRoot(containerEl).render(
+  // 增加 HelmetProvider 的包裹
+  <HelmetProvider>
+    <DataContext.Provider value={pageData}>
+      <BrowserRouter>
+        <App />
+      </BrowserRouter>
+    </DataContext.Provider>
+  </HelmetProvider>
+)
+```
+在ssr-entry中也是如此
+```jsx
+render(
+  pagePath: string,
+  helmetContext: object
+): Promise<RenderResult> {
+  const appHtml = renderToString(
+    // 新增 HelmetProvider 参数
+    <HelmetProvider context={helmetContext}>
+      <DataContext.Provider value={pageData}>
+        <StaticRouter location={pagePath}>
+          <App />
+        </StaticRouter>
+      </DataContext.Provider>
+    </HelmetProvider>
+  )
+}
+```
+然后在html字符串页面中添加helmet信息
+```jsx
+const helmetContext = {
+  context: {}
+} as HelmetData;
+
+const {
+  appHtml,
+  rpressProps = [],
+  rpressToPathMap
+} = await render(routePath, helmetContext.context);
+const { helmet } = helmetContext.context;
+
+const html = `
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  ${helmet?.title?.toString() || ''}
+  ${helmet?.meta?.toString() || ''}
+  ${helmet?.link?.toString() || ''}
+  ${helmet?.style?.toString() || ''}
+  <meta name="description" content="xxx">
+  ...
+`
+```
+然后在Layout页面中加入
+```jsx
+<Helmet>
+  <title>{title}</title>
+</Helmet>
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

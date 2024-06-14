@@ -113,13 +113,18 @@ async function renderPage(render, root, clientBundle, routes) {
       const rpressCode = rpressBundle.output[0].code;
       const { helmet } = helmetContext.context;
       const normalizeVendorFilename = (fileName2) => fileName2.replace(/\//g, "_") + ".js";
+      let lastIndex = routePath.lastIndexOf("/");
+      let flag = "";
+      if (lastIndex > 0 && lastIndex < routePath.length - 1) {
+        flag = ".";
+      }
       const html = `
 <!DOCTYPE html>
 <html>
   <head>
     <meta charset="utf-8">
     <meta name="referrer" content="no-referrer" />
-    <link rel="shortcut icon" href="./rpress.png" type="image/x-icon">
+    <link rel="shortcut icon" href=".${flag}/rpress.png" type="image/x-icon">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     ${helmet?.title?.toString() || ""}
     ${helmet?.meta?.toString() || ""}
@@ -149,7 +154,6 @@ async function renderPage(render, root, clientBundle, routes) {
       await fs.writeFile(join(root, CLIENT_OUTPUT, fileName), html);
     })
   );
-  fs.existsSync(join(root, ".temp")) && await fs.remove(join(root, ".temp"));
   console.log("Rendering page finished");
 }
 async function build(root = process.cwd(), config) {
@@ -264,6 +268,7 @@ cli.command("build [root]", "build in production").action(async (root) => {
   try {
     root = resolve2(root);
     fs3.existsSync(join2(root, "build")) && await fs3.remove(join2(root, "build"));
+    fs3.existsSync(join2(root, ".temp")) && await fs3.remove(join2(root, ".temp"));
     const config = await resolveConfig(root, "build", "production");
     await build(root, config);
   } catch (err) {

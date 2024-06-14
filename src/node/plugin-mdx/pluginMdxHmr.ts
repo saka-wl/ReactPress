@@ -35,7 +35,6 @@ export function pluginMdxHMR(): Plugin {
     },
     // 热更新配置
     handleHotUpdate(ctx) {
-      // console.log(ctx.read())
       if (/\.mdx?/.test(ctx.file)) {
         ctx.server.ws.send({
           type: 'custom',

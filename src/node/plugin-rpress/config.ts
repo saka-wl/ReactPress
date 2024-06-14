@@ -64,6 +64,7 @@ export function pluginConfig(
      * @param ctx
      */
     async handleHotUpdate(ctx) {
+      // 用户自定义配置的路径
       const customWatchedFiles = [config.configPath.replaceAll('\\', '/')];
       const include = (id: string) =>
         customWatchedFiles.some((file) => id.includes(file));

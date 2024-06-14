@@ -145,13 +145,20 @@ export async function renderPage(
       const { helmet } = helmetContext.context;
       const normalizeVendorFilename = (fileName: string) =>
         fileName.replace(/\//g, '_') + '.js';
+      // 获取icon图片
+      const lastIndex = routePath.lastIndexOf('/');
+      let flag = '';
+      if (lastIndex > 0 && lastIndex < routePath.length - 1) {
+        flag = '.';
+      }
+
       const html = `
 <!DOCTYPE html>
 <html>
   <head>
     <meta charset="utf-8">
     <meta name="referrer" content="no-referrer" />
-    <link rel="shortcut icon" href="./rpress.png" type="image/x-icon">
+    <link rel="shortcut icon" href=".${flag}/rpress.png" type="image/x-icon">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     ${helmet?.title?.toString() || ''}
     ${helmet?.meta?.toString() || ''}
@@ -185,7 +192,7 @@ export async function renderPage(
       await fs.writeFile(join(root, CLIENT_OUTPUT, fileName), html);
     })
   );
-  fs.existsSync(join(root, '.temp')) && (await fs.remove(join(root, '.temp')));
+  // fs.existsSync(join(root, '.temp')) && (await fs.remove(join(root, '.temp')));
   console.log('Rendering page finished');
 }
 

@@ -1,0 +1,114 @@
+[https://juejin.cn/post/7083719911112966174](https://juejin.cn/post/7083719911112966174)
+什么是HMR?
+在vite的更新机制中，默认情况会全局更新，但是我们也可以让程序局部更新，这就需要使用到HMR机制（Hot Module Replacement）
+下面是HMR中主要函数的TS类型
+```typescript
+interface ImportMeta {
+  readonly hot?: {
+    // 只读的 data 属性
+    readonly data: any
+
+    // 定义热更接收的模块，有四种定义：
+    // 没有参数，代表接收自身
+    accept(): void
+    
+    // 只有一个回调函数，接收已更新模块的回调函数
+    accept(cb: (mod: any) => void): void
+    
+    // 接收单个依赖 dep 的更新，并调用更新模块的回调函数
+    accept(dep: string, cb: (mod: any) => void): void
+    
+    // 接收多个依赖 deps 的更新，并调用更新模块的回调函数，参数依次为deps对应的模块
+    accept(deps: string[], cb: (mods: any[]) => void): void
+	
+    // 模块不再需要，被剔除时调用回调 cb
+    prune(cb: () => void): void
+    
+    // 清除任何更新导致的持久副作用
+    dispose(cb: (data: any) => void): void
+
+    // 调用后直接刷新页面
+    invalidate(): void
+
+    // 模块监听热更事件
+    on(event: string, cb: (...args: any[]) => void): void
+  }
+}
+
+```
+为了更好的查看效果，我们使用`pnpm create vite hmr-app -- --template vanill`命令来创建一个纯Ts项目
+下面是原来的代码稍稍改了一点
+```tsx
+import { setupCounter } from './counter.ts'
+const mker = 'saka-wl'
+document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
+  <div>
+    <p>${mker}</p>
+    <div class="card">
+      <button id="counter" type="button"></button>
+    </div>
+  </div>
+`
+setupCounter(document.querySelector<HTMLButtonElement>('#counter')!)
+```
+然后，我们如果修改里面的代码内容的话，代码会全局更新，下面是更新效果
+![image.png](https://cdn.nlark.com/yuque/0/2024/png/34286503/1718329730109-37ac1e1b-4913-426a-a902-5237e6adee20.png#averageHue=%23222221&clientId=ua6a2a11d-1b0c-4&from=paste&height=25&id=ueb9f450b&originHeight=37&originWidth=524&originalType=binary&ratio=1.5&rotation=0&showTitle=false&size=7209&status=done&style=none&taskId=uea91d89f-556a-4a15-9660-53ad646a132&title=&width=349.3333333333333)![image.png](https://cdn.nlark.com/yuque/0/2024/png/34286503/1718329749062-1f831719-dfe4-4ac7-a951-0af0704fb4f4.png#averageHue=%23e0c685&clientId=ua6a2a11d-1b0c-4&from=paste&height=365&id=u383e8d3c&originHeight=547&originWidth=795&originalType=binary&ratio=1.5&rotation=0&showTitle=false&size=76086&status=done&style=none&taskId=ue26e5722-04fc-4e48-b85f-12e941b3e24&title=&width=530)
+我们可以看见，网络请求了所有的数据，也就是全局更新，然而，vite也提供了相关的局部更新API，也就是我们上面说的
+```tsx
+const mker = 'saka-wl1'
+...
+  
+// 添加下面三行代码
+if (import.meta.hot) {
+  import.meta.hot.accept()
+}
+```
+![image.png](https://cdn.nlark.com/yuque/0/2024/png/34286503/1718329917469-b4fa7431-c567-4ba7-921a-32e83900ebef.png#averageHue=%23212120&clientId=ua6a2a11d-1b0c-4&from=paste&height=30&id=ue9833380&originHeight=45&originWidth=523&originalType=binary&ratio=1.5&rotation=0&showTitle=false&size=6544&status=done&style=none&taskId=ub4949262-1254-49eb-bb97-6f004ed3ae8&title=&width=348.6666666666667)![image.png](https://cdn.nlark.com/yuque/0/2024/png/34286503/1718329942025-6d18c2a7-8b98-4ebc-bd73-cc9375c660e5.png#averageHue=%23f0f4d8&clientId=ua6a2a11d-1b0c-4&from=paste&height=41&id=u366b8eae&originHeight=62&originWidth=794&originalType=binary&ratio=1.5&rotation=0&showTitle=false&size=5073&status=done&style=none&taskId=u07e79d51-e21b-47bb-8c65-ee32156de84&title=&width=529.3333333333334)
+我们可以发现，如果有文件更新了，下面使用了ImportMeta的API，那么就会使用HMR的更新机制，只会更新自身文件
+但是，如果我们在import回调中获取mker的值的时候，会无法获取其值
+```tsx
+if (import.meta.hot) {
+  import.meta.hot.accept((newModule: any) => {
+    console.log(newModule.mker)  // undefined
+  })
+}
+```
+这是为何？因为我们在页面中没有导出这些值
+```tsx
+export const mker = 'saka-wl1'
+```
+![image.png](https://cdn.nlark.com/yuque/0/2024/png/34286503/1718330306913-f36c4be7-f571-410a-bd48-64a493ce4a73.png#averageHue=%232d2c2b&clientId=ua6a2a11d-1b0c-4&from=paste&height=39&id=u36f7d68e&originHeight=58&originWidth=579&originalType=binary&ratio=1.5&rotation=0&showTitle=false&size=4981&status=done&style=none&taskId=uca42252a-e17d-484a-ac75-3d8d9d4239a&title=&width=386) 这里就可以正常更新了
+我们也可以这样写
+```tsx
+import { setupCounter } from './counter.ts'
+import { setupCounter2 } from "./counter2.ts"
+document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
+  <div>
+    <p>${mker}</p>
+    <div class="card">
+      <button id="counter1" type="button"></button>
+      <button id="counter2" type="button"></button>
+    </div>
+  </div>
+`
+setupCounter(document.querySelector<HTMLButtonElement>('#counter1')!)
+setupCounter2(document.querySelector<HTMLButtonElement>('#counter2')!)
+if(import.meta.hot) {
+  import.meta.hot.accept(['./counter', './counter2'], ([counter1, counter2]) => {
+    console.log(counter1, counter2)
+  })
+}
+```
+对于上面这种函数的形式，当main.ts文件更新时，会更新全局的文件，但当./counter.ts或者./counter2.ts文件更新时，只会更新局部
+
+
+
+
+
+
+
+
+
+
+
+

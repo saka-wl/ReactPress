@@ -80,6 +80,19 @@ export default defineConfig({
                     ]
                 },
                 {
+                    text: "关于热更新",
+                    items: [
+                        {
+                            text: "vite的HMR",
+                            link: '/theory/theory_14_viteHMR'
+                        },
+                        {
+                            text: "预览状态下的热更新",
+                            link: '/theory/theory_16_devHMR'
+                        }
+                    ]
+                },
+                {
                     text: "其他配置",
                     items: [
                         {
@@ -89,6 +102,10 @@ export default defineConfig({
                         {
                             text: 'UnoCSS',
                             link: '/theory/theory_12_UnoCSS'
+                        },
+                        {
+                            text: "关于helmet",
+                            link: "/theory/theory_15_helmet"
                         }
                     ]
                 }
@@ -111,5 +128,6 @@ export default defineConfig({
         },
     },
     'title': 'SAKA_WL',
+    'github': 'https://github.com/saka-wl/reactpress',
     'vite': {}
 })

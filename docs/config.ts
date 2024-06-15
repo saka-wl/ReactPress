@@ -106,6 +106,10 @@ export default defineConfig({
                         {
                             text: "关于helmet",
                             link: "/theory/theory_15_helmet"
+                        },
+                        {
+                            text: "EsBuild打包",
+                            link: "/theory/theory_17_esbuild"
                         }
                     ]
                 }

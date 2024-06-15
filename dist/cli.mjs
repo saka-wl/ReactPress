@@ -6,7 +6,7 @@ import {
   SERVER_ENTRY_PATH,
   createDevServer,
   createVitePlugins
-} from "./chunk-74452F2U.mjs";
+} from "./chunk-FCD3NQHS.mjs";
 import {
   resolveConfig
 } from "./chunk-FT4M4DY2.mjs";
@@ -113,7 +113,7 @@ async function renderPage(render, root, clientBundle, routes) {
       const rpressCode = rpressBundle.output[0].code;
       const { helmet } = helmetContext.context;
       const normalizeVendorFilename = (fileName2) => fileName2.replace(/\//g, "_") + ".js";
-      let lastIndex = routePath.lastIndexOf("/");
+      const lastIndex = routePath.lastIndexOf("/");
       let flag = "";
       if (lastIndex > 0 && lastIndex < routePath.length - 1) {
         flag = ".";

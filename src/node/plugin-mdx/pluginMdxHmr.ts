@@ -34,6 +34,7 @@ export function pluginMdxHMR(): Plugin {
       }
     },
     // 热更新配置
+    // https://cn.vitejs.dev/guide/api-plugin.html#handlehotupdate
     handleHotUpdate(ctx) {
       if (/\.mdx?/.test(ctx.file)) {
         ctx.server.ws.send({

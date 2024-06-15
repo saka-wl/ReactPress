@@ -153,7 +153,30 @@ export function pluginMdxHMR(): Plugin {
   };
 }
 ```
+然后在热更新配置中，我们定义了一个热更新的事件，他会派发到react组件中，下面是对更新事件监听的自定义Hook
+```js
+export function useHeaders(initHeaders: Header[]) {
+  const [headers, setHeaders] = useState(initHeaders);
+  useEffect(() => {
+    if (import.meta.env.DEV) {
+      import.meta.hot.on('mdx-change', ({ filePath }: { filePath: string }) => {
+        const origin = window.location.origin;
+        const path =
+          origin +
+          filePath.slice(filePath.indexOf('ReactPress') + 'ReactPress'.length);
 
+        import(/* @vite-ignore */ `${path}?import&t=${Date.now()}`).then(
+          (module) => {
+            setHeaders(module.toc);
+          }
+        );
+      });
+    }
+  });
+  return headers;
+}
+```
+我们的更新过程是采用import(...+时间戳)的方式来更新
 
 
 

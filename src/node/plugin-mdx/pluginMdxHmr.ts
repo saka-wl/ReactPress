@@ -6,14 +6,18 @@ export function pluginMdxHMR(): Plugin {
   return {
     name: 'vite-plugin-mdx-hmr',
     apply: 'serve',
+    // 存储最终解析的配置
+    // from https://cn.vitejs.dev/guide/api-plugin#configresolved
     configResolved(config) {
       viteReactPlugin = config.plugins.find(
         (plugin) => plugin.name === 'vite:react-babel'
       ) as Plugin;
     },
     // 添加热更新配置
+    // code 为源码
     async transform(code, id, opts) {
-      if (/\.mdx?$/.test(id)) {
+      // /\.mdx?$/.test(id)
+      if (/\.(mdx|md)?$/.test(id)) {
         // Inject babel refresh template code by @vitejs/plugin-react
         // 断言
         assert(typeof viteReactPlugin.transform === 'function');
@@ -36,7 +40,7 @@ export function pluginMdxHMR(): Plugin {
     // 热更新配置
     // https://cn.vitejs.dev/guide/api-plugin.html#handlehotupdate
     handleHotUpdate(ctx) {
-      if (/\.mdx?/.test(ctx.file)) {
+      if (/\.(mdx|md)?$/.test(ctx.file)) {
         ctx.server.ws.send({
           type: 'custom',
           event: 'mdx-change',

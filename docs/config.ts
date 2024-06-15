@@ -88,7 +88,7 @@ export default defineConfig({
                         },
                         {
                             text: "预览状态下的热更新",
-                            link: '/theory/theory_16_devHMR'
+                            link: '/theory/theory_16_devhmr'
                         }
                     ]
                 },

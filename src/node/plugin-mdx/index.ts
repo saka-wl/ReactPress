@@ -21,5 +21,6 @@ import { pluginMdxHMR } from './pluginMdxHmr';
  * @returns
  */
 export async function createMdxPlugins(): Promise<Plugin[]> {
+  // return [await pluginMdxRollup()];
   return [await pluginMdxRollup(), pluginMdxHMR()];
 }

@@ -6,7 +6,7 @@ import {
   SERVER_ENTRY_PATH,
   createDevServer,
   createVitePlugins
-} from "./chunk-FCD3NQHS.mjs";
+} from "./chunk-M2PKBO6X.mjs";
 import {
   resolveConfig
 } from "./chunk-FT4M4DY2.mjs";

@@ -49,7 +49,7 @@ export function pluginConfig(
 ```
 ## Mdx文件修改时的热更新
 看这个之前，可以先看看之前的文章，关于HMR机制
-也就是，我们自定义的mdx文件更新时，会导致路由页面相继更新
+也就是，我们自定义的mdx文件更新时，会导致路由页面相继更新，而且我们的页面状态会保持
 实现方式：
 先谈谈vite的组件更新机制
 
@@ -128,7 +128,7 @@ export function pluginMdxHMR(): Plugin {
           id + '?.jsx',
           opts
         );
-        const selfAcceptCode = 'import.meta.hot.accept();';
+        const selfAcceptCode = 'import.meta.hot2.accept();'; // 这里写了这个就会导致项目中的HMR热更新失效，所以将hot改成hot2
         if (
           typeof result === 'object' &&
           !result!.code?.includes(selfAcceptCode)
@@ -177,27 +177,3 @@ export function useHeaders(initHeaders: Header[]) {
 }
 ```
 我们的更新过程是采用import(...+时间戳)的方式来更新
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

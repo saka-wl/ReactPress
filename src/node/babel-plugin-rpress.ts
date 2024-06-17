@@ -13,7 +13,6 @@ const dynamicImport = new Function('m', 'return import(m)');
 export default declare(async (api) => {
   const { default: babel } = await dynamicImport('@babel/core');
   const T = babel.types;
-  // console.log(T)
   api.assertVersion(7);
 
   const visitor: Visitor<PluginPass> = {

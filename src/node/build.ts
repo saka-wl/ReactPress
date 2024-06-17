@@ -44,7 +44,7 @@ async function buildRpress(
   );
   `;
 
-  // console.log("rpressInjectCode:  " + rpressInjectCode)
+  console.log('rpressInjectCode:  ' + rpressInjectCode);
   const injectId = 'rpress:inject';
   return viteBuild({
     mode: 'production',
@@ -61,17 +61,29 @@ async function buildRpress(
     },
     plugins: [
       // 重点插件，用来加载我们拼接的 rpress 注册模块的代码
+      // https://segmentfault.com/a/1190000043830025#item-3-4
       {
         name: 'rpress:inject',
         enforce: 'post',
         // rpress:inject../../components/Aside/index!!RPRESS!!D:/font/mydemo/ReactPress/src/theme-default/Layout/DocLayout/index.tsx
         async resolveId(id) {
-          // console.log(id)
           if (id.includes(MASK_SPLITTER)) {
             const [originId, importer] = id.split(MASK_SPLITTER);
+            // this.resolve会执行所有插件
+            // 获取目标的信息，解析路径，否则无法通过打包
+            // resp 是一个对象，包括解析后的路径、是否被 enternal 等
             const resp = await this.resolve(originId, importer, {
               skipSelf: true
             });
+            /**
+             * {
+                external: false,
+                id: 'D:/font/mydemo/ReactPress/src/theme-default/components/Aside/index.tsx',
+                meta: {},
+                moduleSideEffects: true,
+                syntheticNamedExports: false
+              }
+             */
             return resp;
           }
 
@@ -250,7 +262,7 @@ export async function bundle(root: string, config: SiteConfig) {
         root,
         plugins: await createVitePlugins(config, undefined, isServer, false),
         ssr: {
-          // 注意加上这个配置，防止 cjs 产物中 require ESM 的产物，因为 react-router-dom 的产物为 ESM 格式  'lodash-es'
+          // 注意加上这个配置，防止 cjs 产物中 require ESM 的产物，因为 react-router-dom 的产物为 ESM 格式
           noExternal: ['react-router-dom']
         },
         build: {

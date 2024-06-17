@@ -6,7 +6,7 @@ import {
   SERVER_ENTRY_PATH,
   createDevServer,
   createVitePlugins
-} from "./chunk-M2PKBO6X.mjs";
+} from "./chunk-A3SCRJOK.mjs";
 import {
   resolveConfig
 } from "./chunk-FT4M4DY2.mjs";
@@ -34,6 +34,7 @@ async function buildRpress(root, rpressToPathMap) {
     document.getElementById('rpress-props').textContent
   );
   `;
+  console.log("rpressInjectCode:  " + rpressInjectCode);
   const injectId = "rpress:inject";
   return viteBuild({
     mode: "production",
@@ -50,6 +51,7 @@ async function buildRpress(root, rpressToPathMap) {
     },
     plugins: [
       // 重点插件，用来加载我们拼接的 rpress 注册模块的代码
+      // https://segmentfault.com/a/1190000043830025#item-3-4
       {
         name: "rpress:inject",
         enforce: "post",
@@ -174,7 +176,7 @@ async function bundle(root, config) {
         root,
         plugins: await createVitePlugins(config, void 0, isServer, false),
         ssr: {
-          // 注意加上这个配置，防止 cjs 产物中 require ESM 的产物，因为 react-router-dom 的产物为 ESM 格式  'lodash-es'
+          // 注意加上这个配置，防止 cjs 产物中 require ESM 的产物，因为 react-router-dom 的产物为 ESM 格式
           noExternal: ["react-router-dom"]
         },
         build: {

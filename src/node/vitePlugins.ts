@@ -29,10 +29,10 @@ export async function createVitePlugins(
         // 控制jsx的导入位置
         jsxImportSource: isSSR
           ? path.join(PACKET_ROOT, 'src', 'runtime')
-          : 'react',
-        babel: {
-          plugins: [babelPluginRpress]
-        }
+          : 'react'
+        // babel: {
+        //   plugins: [babelPluginRpress]
+        // }
       }),
       pluginConfig(config, restart),
       pluginRoutes({

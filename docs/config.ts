@@ -93,6 +93,15 @@ export default defineConfig({
                     ]
                 },
                 {
+                    text: "编译babel",
+                    items: [
+                        {
+                            text: "关于插件@babel_helper-plugin-utils",
+                            link: "/theory/theory_19_babel"
+                        }
+                    ]
+                },
+                {
                     text: "其他配置",
                     items: [
                         {
@@ -110,6 +119,10 @@ export default defineConfig({
                         {
                             text: "EsBuild打包",
                             link: "/theory/theory_17_esbuild"
+                        },
+                        {
+                            text: "Rollup打包",
+                            link: "/theory/theory_18_rollup_build"
                         }
                     ]
                 }

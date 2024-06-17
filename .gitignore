@@ -14,4 +14,7 @@ vendors
 /src/node/__test__/test-helmet-demo.js
 
 /Test
+
 dist/cli.mjs
+
+docs/.temp/**

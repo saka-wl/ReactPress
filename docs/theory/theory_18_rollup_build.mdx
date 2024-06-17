@@ -1,0 +1,126 @@
+在项目中，我们也会使用到rollup来进行打包，也就是vite的默认打包插件Rollup
+我们只要使用到vite的build打包API就会使用到Rollup来进行打包
+下面讲一讲Rollup打包机制
+讲讲Rollup工作流中的build过程
+[https://segmentfault.com/a/1190000043830025#item-2-2](https://segmentfault.com/a/1190000043830025#item-2-2)
+[https://www.rollupjs.com/plugin-development/](https://www.rollupjs.com/plugin-development/)
+
+1. 首先经历 options 钩子进行配置的转换，得到处理后的配置对象。
+2. 随之 Rollup 会调用buildStart钩子，正式开始构建流程。
+3. Rollup 先进入到 resolveId 钩子中解析文件路径(从 input 配置指定的入口文件开始)。
+4. Rollup 通过调用load钩子加载模块内容。
+5. 紧接着 Rollup 执行所有的 transform 钩子来对模块内容进行进行自定义的转换，比如 babel 转译。
+6. 现在 Rollup 拿到了模块内容，接下来就是进行 AST 分析，得到所有的 import 内容，调用 moduleParsed 钩子。如果是普通的 import，则执行 resolveId 钩子，继续回到步骤3；如果是动态 import，则执行 resolveDynamicImport 钩子解析路径，如果解析成功，则回到步骤4加载模块，否则回到步骤3通过 resolveId 解析路径。
+7. 直到所有的 import 都解析完毕，Rollup 执行buildEnd钩子，Build 阶段结束。
+
+当然，在 Rollup 解析路径的时候，即执行resolveId或者resolveDynamicImport的时候，有些路径可能会被标记为external(翻译为排除)，也就是说不参加 Rollup 打包过程，这个时候就不会进行load、transform等等后续的处理了。
+
+下面来根据项目中的例子来学习一下rollup的打包流程
+```javascript
+async function buildRpress(
+  root: string,
+  rpressToPathMap: Record<string, string>
+) {
+  const rpressInjectCode = `
+  ${Object.entries(rpressToPathMap)
+    .map(([rpressName, rpressPath]) => {
+      return `
+      import { ${rpressName} } from '${rpressPath}';
+      `;
+    })
+    .join('')}
+  window.RPRESS = { ${Object.keys(rpressToPathMap).join(', ')} };
+  window.RPRESS_PROPS = JSON.parse(
+    document.getElementById('rpress-props').textContent
+  );
+  `;
+  const injectId = 'rpress:inject';
+  return viteBuild({
+    mode: 'production',
+    esbuild: {
+      jsx: 'automatic'
+    },
+    build: {
+      outDir: path.join(root, '.temp'),
+      rollupOptions: {
+        input: injectId,
+        external: EXTERNALS
+      }
+    },
+    plugins: [
+      {
+        name: 'rpress:inject',
+        enforce: 'post',
+        async resolveId(id) {
+          if (id.includes(MASK_SPLITTER)) {
+            const [originId, importer] = id.split(MASK_SPLITTER);
+            const resp = await this.resolve(originId, importer, {
+              skipSelf: true
+            });
+            return resp;
+          }
+          if (id === injectId) {
+            return id;
+          }
+        },
+        load(id) {
+          if (id === injectId) {
+            return rpressInjectCode;
+          }
+        },
+        generateBundle(_, bundle) {
+          for (const name in bundle) {
+            if (bundle[name].type === 'asset') {
+              delete bundle[name];
+            }
+          }
+        }
+
+      }
+    ]
+  });
+}
+```
+我来讲一下上面的打包流程
+
+1. 第一次运行到resolveId钩子时，id为rpress:inject会被拦截，然后返回该id
+2. 在load时，如果id为rpress:inject，拦截，将返回结果改为我们自定义的返回结果，在我们的返回结果中，是以下的格式
+```javascript
+import Com from "rpress:inject../../components/Aside/index!!RPRESS!!D:/font/mydemo/ReactPress/src/theme-default/Layout/DocLayout/index.tsx"
+window.RPRESS = { ${Object.keys(rpressToPathMap).join(', ')} };
+window.RPRESS_PROPS = JSON.parse(
+  document.getElementById('rpress-props').textContent
+);
+```
+由于Com组件的路径存在问题，所以我们需要在插件中处理一下
+
+3. 接下来，rollup会做AST语法树转换，由于里面有import语句存在，接着返回到resolveId这一步，进行处理；在resolveId钩子中，我们会对带有特殊标识（MASK_SPLITTER）的import路径id处理，为了替换之后的路径可以被其他插件进行处理，通过this.resolve来处理。this.resolve处理之后会返回一个对象，下面是对象的大致内容
+```json
+{
+  external: false,
+  id: 'D:/font/mydemo/ReactPress/src/theme-default/components/Aside/index.tsx',
+  meta: {},
+  moduleSideEffects: true,
+  syntheticNamedExports: false
+}
+```
+总结：在resolveId中，将我们之前写的不规范的导入路径做了规范化处理，通过this.resolve函数来处理！
+讲讲this.resolve(相对路径，绝对路径)
+然后该函数可以通过这个绝对路径与相对路径找到这个**相对路径的绝对路径**，并且返回一个对象，可以给接下来的插件处理里面的内容
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

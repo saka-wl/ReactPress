@@ -1,0 +1,92 @@
+[https://juejin.cn/post/7078482623387402271#heading-1](https://juejin.cn/post/7078482623387402271#heading-1)
+我们通常需要使用babel来将一些es6或者更高的版本编译为浏览器可以运行的版本，这里面就需要使用到babel来进行版本降级，我们在使用babel的过程中，如果需要在babel中添加一些插件，就需要使用到@babel/helper-plugin-utils库
+babel流程：
+![image.png](https://cdn.nlark.com/yuque/0/2024/png/34286503/1718517104311-e00fe429-63e7-47c3-a93f-ddeb6204cb5a.png#averageHue=%23f3f1ed&clientId=u728f7d37-f46b-4&from=paste&height=367&id=u3e9e0d0c&originHeight=551&originWidth=1915&originalType=binary&ratio=1.5&rotation=0&showTitle=false&size=203991&status=done&style=none&taskId=u48ee36ee-abcf-46f8-bfe1-26bbea0e9a2&title=&width=1276.6666666666667)
+我们先安装该库
+> npm install --save-dev @babel/helper-plugin-utils
+
+然后使用
+该插件提供了declare函数，可以自定义插件
+declare函数需要返回一个配置选项对象，该对象可以包括以下属性：
+
+- pre：一个函数，用于在遍历 AST 节点之前进行的操作。
+- visitor：一个对象，用于定义遍历 AST 节点时对各种节点的处理方法。
+- post：一个函数，用于在遍历 AST 节点之后进行的操作。
+
+我们一般在visitor对象中操作，达到统一处理的效果；
+```javascript
+declare(async (api) => {
+  api.assertVersion(7);
+
+  const visitor: Visitor<PluginPass> = {
+    JSXOpeningElement(path, state) {...};
+
+  return {
+    name: '...',
+    visitor
+  };
+}
+});
+
+```
+[https://babel.nodejs.cn/docs/babel-core/#transformsync](https://babel.nodejs.cn/docs/babel-core/#transformsync)
+以下面的代码为例子，我们想要将__rpress属性添加一些值（比如添加组件名字加路径）
+首先，我们需要统一处理代码中所有的组件标签类型的节点（`<Com />`），这就需要在JSXOpeningElement中进行处理
+我们可以在处理之前把这些代码放在AST语法树网站中解析一下，下面是目标组件的解析结果（`<Com __rpress />`）
+[https://lihautan.com/babel-ast-explorer](https://lihautan.com/babel-ast-explorer)
+![image.png](https://cdn.nlark.com/yuque/0/2024/png/34286503/1718521199928-686b374d-bc22-4765-9ea7-b2e4acdbd206.png#averageHue=%23fafe24&clientId=u728f7d37-f46b-4&from=paste&height=441&id=u407b6b86&originHeight=662&originWidth=593&originalType=binary&ratio=1.5&rotation=0&showTitle=false&size=53969&status=done&style=none&taskId=u394495fb-fa0b-4b79-965c-e6bc913fbcc&title=&width=395.3333333333333)
+然后我们就可以处理所有类型为JSXIdentifier的节点（标签类型节点）
+
+1. 获取到他的标签名字（Com）
+2. 通过组件名字，然后查找到他的import引用类型（ImportDeclaration），再获取该标签的引用路径（./Com）
+3. 如果该标签节点有__rpress属性，就添加__rpress的属性信息为`Com%%%./Com`
+```javascript
+const babel = require('@babel/core');
+const { declare } = require('@babel/helper-plugin-utils');
+const code = `
+import { Com } from "./Com";
+function App() {
+    return (
+        <div>
+            <p>Hello</p>
+            <Com __rpress />
+        </div>
+    )
+}
+`
+const result = babel.transformSync(code, {
+    plugins: [
+        "@babel/plugin-transform-react-jsx",
+        declare((api) => {
+            api.assertVersion(7);
+            return {
+                visitor: {
+                    JSXOpeningElement(path, state) {
+                        let name = path.node.name
+                        if (name.type !== 'JSXIdentifier') {
+                            return
+                        }
+                        let bindingName = name.name
+                        let binding = path.scope.getBinding(bindingName);
+                        if(binding?.path?.parent?.type === 'ImportDeclaration') {
+                            const source = binding.path.parent.source;
+                            const attributes = path.container.openingElement.attributes;
+                            for(let i=0;i<attributes.length;i++) {
+                                const itemName = attributes[i].name
+                                if(itemName.name === '__rpress') {
+                                    attributes[i].value =  babel.types.stringLiteral(bindingName + "%%%" + source.value)
+                                }
+                            }
+                        }
+                    }
+
+                }
+            }
+        })
+    ]
+});
+
+console.log(result.code) // __rpress: "Com%%%./Com"
+```
+自此，我们介绍了如何通过@babel/helper-plugin-utils插件来给babel编译时添加插件，我们项目中的使用方法也大致如此
+

@@ -18,3 +18,5 @@ vendors
 dist/cli.mjs
 
 docs/.temp/**
+
+server

@@ -34,7 +34,13 @@ export class RouteService {
     const files = FastGlob.sync(['**/*.{js,jsx,ts,tsx,md,mdx}'], {
       cwd: this.#scanDir,
       absolute: true,
-      ignore: ['**/node_modules/**', '**/build/**', 'config.ts']
+      ignore: [
+        '**/node_modules/**',
+        '**/build/**',
+        'config.ts',
+        '**/.temp/**',
+        '**/tempRpress/**'
+      ]
     }).sort();
     files.forEach((file) => {
       /**
@@ -69,15 +75,40 @@ export class RouteService {
    * 为何不使用React.lazy() ? lazy只适用于client端，服务器渲染不适用
    * @returns
    */
+  // generateRoutesCode(ssr: boolean) {
+  //   return `
+  //     import React from 'react';
+  //     ${ssr ? '' : 'import loadable from "@loadable/component";'}
+  //     ${this.#routeData
+  //       .map((route, index) => {
+  //         return ssr
+  //           ? `import Route${index} from "${route.absolutePath}";`
+  //           : `const Route${index} = loadable(() => import('${route.absolutePath}'));`;
+  //       })
+  //       .join('\n')}
+  //     export const routes = [
+  //     ${this.#routeData
+  //       .map((route, index) => {
+  //         return `{ path: '${route.routePath}', element: React.createElement(Route${index}), preload: () => import('${route.absolutePath}') }`;
+  //       })
+  //       .join(',\n')}
+  //     ];
+  //     `;
+  // }
+  /**
+   * 生成esm导出类型的路由
+   * 使用 @loadable/component 包中的代码拆分，按需加载代码，避免了下载不需要的代码，减少了初始加载期间所需的代码量
+   * 为何不使用React.lazy() ? lazy只适用于client端，服务器渲染不适用，V18可用
+   * @returns
+   */
   generateRoutesCode(ssr: boolean) {
     return `
       import React from 'react';
-      ${ssr ? '' : 'import loadable from "@loadable/component";'}
       ${this.#routeData
         .map((route, index) => {
           return ssr
             ? `import Route${index} from "${route.absolutePath}";`
-            : `const Route${index} = loadable(() => import('${route.absolutePath}'));`;
+            : `const Route${index} = React.lazy(() => import('${route.absolutePath}'));`;
         })
         .join('\n')}
       export const routes = [

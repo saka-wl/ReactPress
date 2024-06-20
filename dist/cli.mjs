@@ -6,14 +6,15 @@ import {
   SERVER_ENTRY_PATH,
   createDevServer,
   createVitePlugins
-} from "./chunk-A3SCRJOK.mjs";
+} from "./chunk-I6UIPA6M.mjs";
 import {
+  __dirname,
   resolveConfig
 } from "./chunk-FT4M4DY2.mjs";
 
 // src/node/cli.ts
 import cac from "cac";
-import { join as join2, resolve as resolve2 } from "path";
+import { join as join3, resolve as resolve2 } from "path";
 
 // src/node/build.ts
 import { build as viteBuild } from "vite";
@@ -34,7 +35,6 @@ async function buildRpress(root, rpressToPathMap) {
     document.getElementById('rpress-props').textContent
   );
   `;
-  console.log("rpressInjectCode:  " + rpressInjectCode);
   const injectId = "rpress:inject";
   return viteBuild({
     mode: "production",
@@ -88,74 +88,89 @@ async function buildRpress(root, rpressToPathMap) {
 async function renderPage(render, root, clientBundle, routes) {
   console.log("Rendering page in server side...");
   fs.existsSync(join(root, ".temp")) && await fs.remove(join(root, ".temp"));
+  let recordRpress = {};
   const clientChunk = clientBundle.output.find(
     (chunk) => chunk.type === "chunk" && chunk.isEntry
   );
-  await Promise.all(
-    [
+  let handleRoutes = async (route) => {
+    const routePath = route.path;
+    const helmetContext = {
+      context: {}
+    };
+    const {
+      appHtml,
+      rpressProps = [],
+      rpressToPathMap
+    } = await render(routePath, helmetContext.context);
+    const styleAssets = clientBundle.output.filter(
+      (chunk) => chunk.type === "asset" && chunk.fileName.endsWith(".css")
+    );
+    let recordRpressKey = "";
+    Object.entries(rpressToPathMap).map(([rpressName, rpressPath]) => {
+      recordRpressKey += rpressName;
+    });
+    let rpressCode = "";
+    if (recordRpress[recordRpressKey] === null || recordRpress[recordRpressKey] === void 0) {
+      const rpressBundle = await buildRpress(root, rpressToPathMap);
+      rpressCode = rpressBundle.output[0].code;
+      recordRpress[recordRpressKey] = rpressCode;
+    } else {
+      rpressCode = recordRpress[recordRpressKey];
+    }
+    const { helmet } = helmetContext.context;
+    const normalizeVendorFilename = (fileName2) => fileName2.replace(/\//g, "_") + ".js";
+    const lastIndex = routePath.lastIndexOf("/");
+    let flag = "";
+    if (lastIndex > 0 && lastIndex < routePath.length - 1) {
+      flag = ".";
+    }
+    const html = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="referrer" content="no-referrer" />
+  <link rel="shortcut icon" href=".${flag}/rpress.png" type="image/x-icon">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  ${helmet?.title?.toString() || ""}
+  ${helmet?.meta?.toString() || ""}
+  ${helmet?.link?.toString() || ""}
+  ${helmet?.style?.toString() || ""}
+  <meta name="description" content="xxx">
+  ${styleAssets.map((item) => `<link rel="stylesheet" href="/${item.fileName}">`).join("\n")}
+  <script type="importmap">
+    {
+      "imports": {
+        ${EXTERNALS.map(
+      (name) => `"${name}": "/${normalizeVendorFilename(name)}"`
+    ).join(",")}
+      }
+    }
+  </script>
+</head>
+<body>
+  <div id="root">${appHtml}</div>
+  <script type="module">${rpressCode}</script>
+  <script type="module" src="/${clientChunk?.fileName}"></script>
+  <script id="rpress-props">${JSON.stringify(rpressProps)}</script>
+</body>
+</html>`.trim();
+    const fileName = routePath.endsWith("/") ? `${routePath}index.html` : `${routePath}.html`;
+    await fs.ensureDir(join(root, CLIENT_OUTPUT, dirname(fileName)));
+    await fs.writeFile(join(root, CLIENT_OUTPUT, fileName), html);
+  };
+  let asyncFn = async () => {
+    let allRoutes = [
       ...routes,
       {
         path: "/404"
       }
-    ].map(async (route) => {
-      const routePath = route.path;
-      const helmetContext = {
-        context: {}
-      };
-      console.log(routePath);
-      const {
-        appHtml,
-        rpressProps = [],
-        rpressToPathMap
-      } = await render(routePath, helmetContext.context);
-      const styleAssets = clientBundle.output.filter(
-        (chunk) => chunk.type === "asset" && chunk.fileName.endsWith(".css")
-      );
-      const rpressBundle = await buildRpress(root, rpressToPathMap);
-      const rpressCode = rpressBundle.output[0].code;
-      const { helmet } = helmetContext.context;
-      const normalizeVendorFilename = (fileName2) => fileName2.replace(/\//g, "_") + ".js";
-      const lastIndex = routePath.lastIndexOf("/");
-      let flag = "";
-      if (lastIndex > 0 && lastIndex < routePath.length - 1) {
-        flag = ".";
-      }
-      const html = `
-<!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8">
-    <meta name="referrer" content="no-referrer" />
-    <link rel="shortcut icon" href=".${flag}/rpress.png" type="image/x-icon">
-    <meta name="viewport" content="width=device-width,initial-scale=1">
-    ${helmet?.title?.toString() || ""}
-    ${helmet?.meta?.toString() || ""}
-    ${helmet?.link?.toString() || ""}
-    ${helmet?.style?.toString() || ""}
-    <meta name="description" content="xxx">
-    ${styleAssets.map((item) => `<link rel="stylesheet" href="/${item.fileName}">`).join("\n")}
-    <script type="importmap">
-      {
-        "imports": {
-          ${EXTERNALS.map(
-        (name) => `"${name}": "/${normalizeVendorFilename(name)}"`
-      ).join(",")}
-        }
-      }
-    </script>
-  </head>
-  <body>
-    <div id="root">${appHtml}</div>
-    <script type="module">${rpressCode}</script>
-    <script type="module" src="/${clientChunk?.fileName}"></script>
-    <script id="rpress-props">${JSON.stringify(rpressProps)}</script>
-  </body>
-</html>`.trim();
-      const fileName = routePath.endsWith("/") ? `${routePath}index.html` : `${routePath}.html`;
-      await fs.ensureDir(join(root, CLIENT_OUTPUT, dirname(fileName)));
-      await fs.writeFile(join(root, CLIENT_OUTPUT, fileName), html);
-    })
-  );
+    ];
+    for (let item of allRoutes) {
+      await handleRoutes(item);
+    }
+  };
+  await asyncFn();
   console.log("Rendering page finished");
 }
 async function build(root = process.cwd(), config) {
@@ -216,6 +231,7 @@ async function bundle(root, config) {
 }
 
 // src/node/preview.ts
+import compression from "compression";
 import { resolve } from "path";
 import fs2 from "fs-extra";
 import sirv from "sirv";
@@ -228,6 +244,7 @@ async function preview(root, { port }) {
   const { default: express } = await dynamicImport2("express");
   const notFoundPage = fs2.readFileSync(resolve(outputDir, "404.html"), "utf-8");
   const app = express();
+  app.use(compression());
   const serve = sirv(outputDir, {
     etag: true,
     maxAge: 31536e3,
@@ -253,7 +270,77 @@ async function preview(root, { port }) {
 }
 
 // src/node/cli.ts
+import fs4 from "fs-extra";
+
+// src/node/server.ts
 import fs3 from "fs-extra";
+import { join as join2 } from "path";
+import { exec } from "child_process";
+var template = (root, port) => `
+const compression = require("compression")
+const { resolve } = require("path")
+const fs = require("fs-extra")
+const sirv = require("sirv")
+const express = require('express')
+
+const DEFAULT_PORT = 4173;
+
+function startServer(root, port) {
+  const listenPort = port ?? DEFAULT_PORT;
+  const outputDir = resolve(root);
+
+  const notFoundPage = fs.readFileSync(resolve(outputDir, '404.html'), 'utf-8');
+  const app = express();
+
+  app.use(compression())
+
+  // \u9759\u6001\u8D44\u6E90\u670D\u52A1
+  const serve = sirv(outputDir, {
+    etag: true,
+    maxAge: 31536000,
+    immutable: true,
+    setHeaders(res, pathname) {
+      if (pathname.endsWith('.html')) {
+        res.setHeader('Cache-Control', 'no-cache');
+      }
+    }
+  });
+
+  app.use(serve);
+  app.use('*', function (req, res) {
+    res.end(notFoundPage);
+  });
+
+  app.listen(listenPort, (err) => {
+    if (err) {
+      throw err;
+    }
+    console.log(
+      '> Preview server is running at http://localhost:' + listenPort
+    );
+  });
+}
+
+startServer('${root}', ${port})  
+`;
+var addExpressServer = async (root, port, linux) => {
+  fs3.existsSync(join2(__dirname, "../server")) && await fs3.remove(join2(__dirname, "../server"));
+  const originFileDir = join2(root, "./build");
+  await fs3.ensureDir(join2(__dirname, "../server"));
+  if (fs3.pathExistsSync(originFileDir)) {
+    await fs3.copy(originFileDir, join2(__dirname, "../server"));
+    await fs3.ensureFile(join2(__dirname, "../server/app.js"));
+    await fs3.writeFile(join2(__dirname, "../server/app.js"), template(linux, port));
+  }
+  exec("cd server && npm init -y", (err) => {
+    console.log(err);
+    exec("cd server && npm i compression fs-extra sirv express", (err2) => {
+      console.log(err2);
+    });
+  });
+};
+
+// src/node/cli.ts
 var cli = cac("rpress").version("0.0.1").help();
 cli.command("dev [root]", "start dev server").action(async (root) => {
   const createServer = async () => {
@@ -269,8 +356,8 @@ cli.command("dev [root]", "start dev server").action(async (root) => {
 cli.command("build [root]", "build in production").action(async (root) => {
   try {
     root = resolve2(root);
-    fs3.existsSync(join2(root, "build")) && await fs3.remove(join2(root, "build"));
-    fs3.existsSync(join2(root, ".temp")) && await fs3.remove(join2(root, ".temp"));
+    fs4.existsSync(join3(root, "build")) && await fs4.remove(join3(root, "build"));
+    fs4.existsSync(join3(root, ".temp")) && await fs4.remove(join3(root, ".temp"));
     const config = await resolveConfig(root, "build", "production");
     await build(root, config);
   } catch (err) {
@@ -281,6 +368,13 @@ cli.command("preview [root]", "preview production build").option("--port <port>"
   try {
     root = resolve2(root);
     await preview(root, { port });
+  } catch (e) {
+    console.log(e);
+  }
+});
+cli.command("server [... args]", "add a server by node-express").option("--port <port>", "port to use for adding a server").action(async (args, { port }) => {
+  try {
+    await addExpressServer(args[0], port, args[1]);
   } catch (e) {
     console.log(e);
   }

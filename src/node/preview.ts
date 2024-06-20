@@ -1,7 +1,5 @@
 import compression from 'compression';
-// import polka from 'polka';
 // import express from "express"
-// import path from 'path';
 import { resolve } from 'path';
 import { resolveConfig } from './config';
 import fs from 'fs-extra';
@@ -20,6 +18,8 @@ export async function preview(root: string, { port }: { port?: number }) {
   const notFoundPage = fs.readFileSync(resolve(outputDir, '404.html'), 'utf-8');
   // const compress = compression();
   const app = express();
+
+  app.use(compression());
 
   // 静态资源服务
   const serve = sirv(outputDir, {

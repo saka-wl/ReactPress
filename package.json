@@ -1,7 +1,7 @@
 {
-  "name": "ReactPress",
+  "name": "reactpress",
   "version": "1.0.0",
-  "description": "",
+  "description": "首先拉去到我们的项目",
   "main": "index.js",
   "lint-staged": {
     "**/*.{js,jsx,tsx,ts}": [
@@ -36,6 +36,7 @@
     "@vitest/ui": "0.22.1",
     "acorn": "^8.11.3",
     "cac": "^6.7.14",
+    "child_process": "^1.0.2",
     "compress": "^0.99.0",
     "compression": "^1.7.4",
     "esbuild": "^0.21.3",
@@ -81,6 +82,7 @@
     "@types/mdast": "^4.0.3",
     "@types/node": "^20.12.8",
     "@types/resolve": "^1.20.6",
+    "@types/rollup-plugin-visualizer": "^4.2.4",
     "@typescript-eslint/eslint-plugin": "^5.36.1",
     "@typescript-eslint/parser": "^5.36.1",
     "commitlint": "^17.1.2",
@@ -97,11 +99,15 @@
     "ora": "^8.0.1",
     "prettier": "2.8.8",
     "remark-mdx": "^3.0.1",
+    "rollup-plugin-visualizer": "^5.12.0",
     "sass": "^1.77.1",
     "serve": "^14.2.3",
     "tsup": "^8.0.2",
     "tsx": "3.8.2",
     "typescript": "^5.4.5",
     "unist-util-visit": "5.0.0"
+  },
+  "directories": {
+    "doc": "docs"
   }
 }

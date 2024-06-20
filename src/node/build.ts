@@ -44,7 +44,7 @@ async function buildRpress(
   );
   `;
 
-  console.log('rpressInjectCode:  ' + rpressInjectCode);
+  // console.log('rpressInjectCode:  ' + rpressInjectCode);
   const injectId = 'rpress:inject';
   return viteBuild({
     mode: 'production',
@@ -125,85 +125,107 @@ export async function renderPage(
   console.log('Rendering page in server side...');
   fs.existsSync(join(root, '.temp')) && (await fs.remove(join(root, '.temp')));
   // clientBundle中是一些依赖包的打包结果
+  const recordRpress = {};
   const clientChunk = clientBundle.output.find(
     (chunk) => chunk.type === 'chunk' && chunk.isEntry
   );
-  await Promise.all(
-    [
+
+  const handleRoutes = async (route) => {
+    const routePath = route.path;
+    const helmetContext = {
+      context: {}
+    } as HelmetData;
+    // console.log(routePath);
+    // 在node服务器中生成相应的html等文件
+    const {
+      appHtml,
+      rpressProps = [],
+      rpressToPathMap
+    } = await render(routePath, helmetContext.context);
+    const styleAssets = clientBundle.output.filter(
+      (chunk) => chunk.type === 'asset' && chunk.fileName.endsWith('.css')
+    );
+
+    let recordRpressKey = '';
+    Object.entries(rpressToPathMap).map(([rpressName, rpressPath]) => {
+      recordRpressKey += rpressName;
+    });
+    let rpressCode = '';
+    // console.log(recordRpress)
+    if (
+      recordRpress[recordRpressKey] === null ||
+      recordRpress[recordRpressKey] === undefined
+    ) {
+      const rpressBundle = await buildRpress(root, rpressToPathMap);
+      // 交互的逻辑rpressProps为交互props的信息
+      rpressCode = (rpressBundle as RollupOutput).output[0].code;
+      recordRpress[recordRpressKey] = rpressCode;
+    } else {
+      rpressCode = recordRpress[recordRpressKey];
+    }
+    const { helmet } = helmetContext.context;
+    const normalizeVendorFilename = (fileName: string) =>
+      fileName.replace(/\//g, '_') + '.js';
+    // 获取icon图片
+    const lastIndex = routePath.lastIndexOf('/');
+    let flag = '';
+    if (lastIndex > 0 && lastIndex < routePath.length - 1) {
+      flag = '.';
+    }
+
+    const html = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="referrer" content="no-referrer" />
+  <link rel="shortcut icon" href=".${flag}/rpress.png" type="image/x-icon">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  ${helmet?.title?.toString() || ''}
+  ${helmet?.meta?.toString() || ''}
+  ${helmet?.link?.toString() || ''}
+  ${helmet?.style?.toString() || ''}
+  <meta name="description" content="xxx">
+  ${styleAssets
+    .map((item) => `<link rel="stylesheet" href="/${item.fileName}">`)
+    .join('\n')}
+  <script type="importmap">
+    {
+      "imports": {
+        ${EXTERNALS.map(
+          (name) => `"${name}": "/${normalizeVendorFilename(name)}"`
+        ).join(',')}
+      }
+    }
+  </script>
+</head>
+<body>
+  <div id="root">${appHtml}</div>
+  <script type="module">${rpressCode}</script>
+  <script type="module" src="/${clientChunk?.fileName}"></script>
+  <script id="rpress-props">${JSON.stringify(rpressProps)}</script>
+</body>
+</html>`.trim();
+    const fileName = routePath.endsWith('/')
+      ? `${routePath}index.html`
+      : `${routePath}.html`;
+    await fs.ensureDir(join(root, CLIENT_OUTPUT, dirname(fileName)));
+    await fs.writeFile(join(root, CLIENT_OUTPUT, fileName), html);
+  };
+
+  const asyncFn = async () => {
+    const allRoutes = [
       ...routes,
       {
         path: '/404'
       }
-    ].map(async (route) => {
-      const routePath = route.path;
-      const helmetContext = {
-        context: {}
-      } as HelmetData;
-      console.log(routePath);
-      // 在node服务器中生成相应的html等文件
-      const {
-        appHtml,
-        rpressProps = [],
-        rpressToPathMap
-      } = await render(routePath, helmetContext.context);
-      const styleAssets = clientBundle.output.filter(
-        (chunk) => chunk.type === 'asset' && chunk.fileName.endsWith('.css')
-      );
+    ];
+    for (const item of allRoutes) {
+      await handleRoutes(item);
+    }
+  };
 
-      const rpressBundle = await buildRpress(root, rpressToPathMap);
-      // 交互的逻辑  rpressProps为交互props的信息
-      const rpressCode = (rpressBundle as RollupOutput).output[0].code;
-
-      const { helmet } = helmetContext.context;
-      const normalizeVendorFilename = (fileName: string) =>
-        fileName.replace(/\//g, '_') + '.js';
-      // 获取icon图片
-      const lastIndex = routePath.lastIndexOf('/');
-      let flag = '';
-      if (lastIndex > 0 && lastIndex < routePath.length - 1) {
-        flag = '.';
-      }
-
-      const html = `
-<!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8">
-    <meta name="referrer" content="no-referrer" />
-    <link rel="shortcut icon" href=".${flag}/rpress.png" type="image/x-icon">
-    <meta name="viewport" content="width=device-width,initial-scale=1">
-    ${helmet?.title?.toString() || ''}
-    ${helmet?.meta?.toString() || ''}
-    ${helmet?.link?.toString() || ''}
-    ${helmet?.style?.toString() || ''}
-    <meta name="description" content="xxx">
-    ${styleAssets
-      .map((item) => `<link rel="stylesheet" href="/${item.fileName}">`)
-      .join('\n')}
-    <script type="importmap">
-      {
-        "imports": {
-          ${EXTERNALS.map(
-            (name) => `"${name}": "/${normalizeVendorFilename(name)}"`
-          ).join(',')}
-        }
-      }
-    </script>
-  </head>
-  <body>
-    <div id="root">${appHtml}</div>
-    <script type="module">${rpressCode}</script>
-    <script type="module" src="/${clientChunk?.fileName}"></script>
-    <script id="rpress-props">${JSON.stringify(rpressProps)}</script>
-  </body>
-</html>`.trim();
-      const fileName = routePath.endsWith('/')
-        ? `${routePath}index.html`
-        : `${routePath}.html`;
-      await fs.ensureDir(join(root, CLIENT_OUTPUT, dirname(fileName)));
-      await fs.writeFile(join(root, CLIENT_OUTPUT, fileName), html);
-    })
-  );
+  await asyncFn();
   // fs.existsSync(join(root, '.temp')) && (await fs.remove(join(root, '.temp')));
   console.log('Rendering page finished');
 }

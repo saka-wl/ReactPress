@@ -14,6 +14,8 @@ import path from 'path';
 import { PACKET_ROOT } from './constant';
 import babelPluginRpress from './babel-plugin-rpress';
 
+const dynamicImport = new Function('m', 'return import(m)');
+
 export async function createVitePlugins(
   config: SiteConfig,
   restart?: () => Promise<void>,
@@ -42,6 +44,7 @@ export async function createVitePlugins(
       await createMdxPlugins()
     ];
   } else {
+    const { visualizer } = await dynamicImport('rollup-plugin-visualizer');
     return [
       pluginUnocss(unocssOptions),
       // pluginIndexHtml(),
@@ -60,7 +63,9 @@ export async function createVitePlugins(
         root: config.root,
         isSSR
       }),
-      await createMdxPlugins()
+      await createMdxPlugins(),
+      // 将这个visualizer插件放到最后的位置中
+      visualizer()
     ];
   }
 }

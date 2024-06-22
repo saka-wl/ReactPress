@@ -1,0 +1,22 @@
+.hit {
+    background-color: var(--rpress-searchBox-bg-soft);
+}
+
+.hit:hover {
+    background-color: var(--rpress-c-green-lightest);
+}
+.dark .hit:hover {
+    background-color: var(--rpress-c-green-dark);
+}
+
+.scrollBox::-webkit-scrollbar {
+    display: none
+}
+
+.box {
+    border: 1.4px solid transparent;
+}
+
+.box:hover {
+    border: 1.4px solid var(--rpress-c-blue-lighter);
+}

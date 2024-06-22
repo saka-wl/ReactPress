@@ -49,6 +49,7 @@ export function pluginMdxHMR(): Plugin {
           }
         });
       }
+      return null;
     }
   };
 }

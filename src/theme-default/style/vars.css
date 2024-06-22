@@ -53,6 +53,7 @@
     --rpress-c-green: #21b8a3;
     --rpress-c-green-light: #41c6b0;
     --rpress-c-green-lighter: #41c6b0;
+    --rpress-c-green-lightest: #5cb5a4;
     --rpress-c-green-dark: #149684;
     --rpress-c-green-darker: #149684;
     --rpress-c-green-dimm: #062521;
@@ -266,6 +267,9 @@
   
     --rpress-button-sponsor-border: var(--rpress-c-gray-dark-1);
     --rpress-button-sponsor-text: var(--rpress-c-text-dark-2);
+    --rpress-searchBox-icon: var(--rpress-c-white);
+    --rpress-searchBox-bg: var(--rpress-c-black-mute);
+    --rpress-searchBox-bg-soft: var(--rpress-c-gray-dark-2);
   }
   
   /**
@@ -294,6 +298,8 @@
     --rpress-custom-block-danger-text: var(--rpress-c-red-darker);
     --rpress-custom-block-danger-bg: var(--rpress-c-red-dimm-3);
     --rpress-custom-block-danger-code-bg: var(--rpress-custom-block-danger-bg);
+    --rpress-searchBox-icon: var(--rpress-c-black);
+    --rpress-searchBox-bg: var(--rpress-c-white-soft);
   }
   
   .dark {
@@ -309,6 +315,9 @@
   
     --rpress-custom-block-danger-border: var(--rpress-c-red-dimm-2);
     --rpress-custom-block-danger-text: var(--rpress-c-red-light);
+    --rpress-searchBox-icon: var(--rpress-c-white);
+    --rpress-searchBox-bg: var(--rpress-c-black-mute);
+    --rpress-searchBox-bg-soft: var(--rpress-c-gray-dark-2);
   }
   
   /**

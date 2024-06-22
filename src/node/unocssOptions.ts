@@ -29,6 +29,9 @@ const options: VitePluginConfig = {
     'flex-center': 'flex justify-center items-center'
   },
   theme: {
+    fontSize: {
+      normal: '20px'
+    },
     colors: {
       brandLight: 'var(--rpress-c-brand-light)',
       brandDark: 'var(--rpress-c-brand-dark)',

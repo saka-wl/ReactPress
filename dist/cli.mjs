@@ -6,7 +6,7 @@ import {
   SERVER_ENTRY_PATH,
   createDevServer,
   createVitePlugins
-} from "./chunk-I6UIPA6M.mjs";
+} from "./chunk-46ISPFHB.mjs";
 import {
   __dirname,
   resolveConfig
@@ -14,7 +14,7 @@ import {
 
 // src/node/cli.ts
 import cac from "cac";
-import { join as join3, resolve as resolve2 } from "path";
+import { join as join4, resolve as resolve2 } from "path";
 
 // src/node/build.ts
 import { build as viteBuild } from "vite";
@@ -88,11 +88,11 @@ async function buildRpress(root, rpressToPathMap) {
 async function renderPage(render, root, clientBundle, routes) {
   console.log("Rendering page in server side...");
   fs.existsSync(join(root, ".temp")) && await fs.remove(join(root, ".temp"));
-  let recordRpress = {};
+  const recordRpress = {};
   const clientChunk = clientBundle.output.find(
     (chunk) => chunk.type === "chunk" && chunk.isEntry
   );
-  let handleRoutes = async (route) => {
+  const handleRoutes = async (route) => {
     const routePath = route.path;
     const helmetContext = {
       context: {}
@@ -159,14 +159,14 @@ async function renderPage(render, root, clientBundle, routes) {
     await fs.ensureDir(join(root, CLIENT_OUTPUT, dirname(fileName)));
     await fs.writeFile(join(root, CLIENT_OUTPUT, fileName), html);
   };
-  let asyncFn = async () => {
-    let allRoutes = [
+  const asyncFn = async () => {
+    const allRoutes = [
       ...routes,
       {
         path: "/404"
       }
     ];
-    for (let item of allRoutes) {
+    for (const item of allRoutes) {
       await handleRoutes(item);
     }
   };
@@ -270,7 +270,7 @@ async function preview(root, { port }) {
 }
 
 // src/node/cli.ts
-import fs4 from "fs-extra";
+import fs5 from "fs-extra";
 
 // src/node/server.ts
 import fs3 from "fs-extra";
@@ -330,7 +330,10 @@ var addExpressServer = async (root, port, linux) => {
   if (fs3.pathExistsSync(originFileDir)) {
     await fs3.copy(originFileDir, join2(__dirname, "../server"));
     await fs3.ensureFile(join2(__dirname, "../server/app.js"));
-    await fs3.writeFile(join2(__dirname, "../server/app.js"), template(linux, port));
+    await fs3.writeFile(
+      join2(__dirname, "../server/app.js"),
+      template(linux, port)
+    );
   }
   exec("cd server && npm init -y", (err) => {
     console.log(err);
@@ -339,6 +342,42 @@ var addExpressServer = async (root, port, linux) => {
     });
   });
 };
+
+// src/node/getAlgoliaJson/index.ts
+import md5 from "md5";
+import fs4 from "fs-extra";
+import { join as join3 } from "path";
+async function handleAlgoliaJson(root, userConfig) {
+  let { nav: navs, sidebar: siders } = userConfig.siteData.themeConfig;
+  let json = [];
+  for (let { text: navText, link: navLink } of navs) {
+    if (navLink === "/") continue;
+    for (let { text: siderText, items: siderItems } of siders[navLink]) {
+      for (let { text: itemText, link: itemLink } of siderItems) {
+        let tmp = {
+          fileName: "",
+          fileRoute: "",
+          zip_code: "",
+          objectID: ""
+        };
+        let filePath = "";
+        if (fs4.existsSync(join3(root, "." + itemLink) + ".mdx")) filePath = join3(root, "." + itemLink) + ".mdx";
+        if (fs4.existsSync(join3(root, "." + itemLink) + ".md")) filePath = join3(root, "." + itemLink) + ".md";
+        if (filePath === "") continue;
+        tmp.fileName = navText + "-" + siderText + "-" + itemText;
+        tmp.fileRoute = itemLink;
+        tmp.zip_code = (await fs4.readFile(filePath, "utf-8")).replaceAll("\n", "").replaceAll(" ", "").replace(/!\[(.*?)\]\((.*?)\)/mg, "").replace(/\[(.*?)\]\((.*?)\)/mg, "").replace(/\r/mg, "").replace(/```(.*?)```/mg, "");
+        let tmpMd5 = await md5(tmp.zip_code);
+        tmp.objectID = Date.now().toString().substring(6, 12) + "-" + tmpMd5;
+        json.push(tmp);
+      }
+    }
+  }
+  await fs4.exists(root + "/algoliajson.json") && await fs4.remove(root + "/algoliajson.json");
+  fs4.writeFile(root + "/algoliajson.json", JSON.stringify(json), (err) => {
+    console.log(err);
+  });
+}
 
 // src/node/cli.ts
 var cli = cac("rpress").version("0.0.1").help();
@@ -356,8 +395,8 @@ cli.command("dev [root]", "start dev server").action(async (root) => {
 cli.command("build [root]", "build in production").action(async (root) => {
   try {
     root = resolve2(root);
-    fs4.existsSync(join3(root, "build")) && await fs4.remove(join3(root, "build"));
-    fs4.existsSync(join3(root, ".temp")) && await fs4.remove(join3(root, ".temp"));
+    fs5.existsSync(join4(root, "build")) && await fs5.remove(join4(root, "build"));
+    fs5.existsSync(join4(root, ".temp")) && await fs5.remove(join4(root, ".temp"));
     const config = await resolveConfig(root, "build", "production");
     await build(root, config);
   } catch (err) {
@@ -379,4 +418,10 @@ cli.command("server [... args]", "add a server by node-express").option("--port 
     console.log(e);
   }
 });
+cli.command("getJson [root]").action(
+  async (root) => {
+    const config = await resolveConfig(root, "build", "production");
+    await handleAlgoliaJson(root, config);
+  }
+);
 cli.parse();

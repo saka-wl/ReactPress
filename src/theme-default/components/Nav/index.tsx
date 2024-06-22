@@ -2,6 +2,7 @@ import { usePageData } from '@runtime';
 import { NavItemWithLink } from 'shared/types';
 import styles from './index.module.scss';
 import { SwitchAppearance } from '../SwitchAppearance';
+import Search from '../Search';
 
 function MenuItem({ item }: { item: NavItemWithLink; key: string }) {
   return (
@@ -32,6 +33,9 @@ export function Nav() {
           >
             Rpress.js
           </a>
+        </div>
+        <div>
+          <Search __rpress />
         </div>
         <div flex="~">
           <div flex="~">

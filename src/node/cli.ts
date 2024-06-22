@@ -6,6 +6,7 @@ import { resolveConfig } from './config';
 import { preview } from './preview';
 import fs from 'fs-extra';
 import { addExpressServer } from './server';
+import { handleAlgoliaJson } from './getAlgoliaJson';
 
 const cli = cac('rpress').version('0.0.1').help();
 
@@ -66,12 +67,17 @@ cli
 cli
   .command('server [... args]', 'add a server by node-express')
   .option('--port <port>', 'port to use for adding a server')
-  .action(async (args: Array<any>, { port }: { port: number }) => {
+  .action(async (args: Array<string>, { port }: { port: number }) => {
     try {
       await addExpressServer(args[0], port, args[1]);
     } catch (e) {
       console.log(e);
     }
   });
+
+cli.command('getJson [root]').action(async (root: string) => {
+  const config = await resolveConfig(root, 'build', 'production');
+  await handleAlgoliaJson(root, config);
+});
 
 cli.parse();

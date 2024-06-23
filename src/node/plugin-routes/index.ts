@@ -43,9 +43,8 @@ export function pluginRoutes(options: PluginOption): Plugin {
         /**
          * 得到：
             import React from 'react';
-            import loadable from "@loadable/component";
-            const Route0 = loadable(() => import('D:/font/mydemo/ReactPress/docs/Counter.tsx'));
-            const Route1 = loadable(() => import('D:/font/mydemo/ReactPress/docs/guide/a.jsx'));
+            const Route0 = React.lazy(() => import('D:/font/mydemo/ReactPress/docs/Counter.tsx'));
+            const Route1 = React.lazy(() => import('D:/font/mydemo/ReactPress/docs/guide/a.jsx'));
             export const routes = [
               { path: '/Counter', element: React.createElement(Route0), preload: () => import('D:/font/mydemo/ReactPress/docs/Counter.tsx') },
               { path: '/guide/a', element: React.createElement(Route1), preload: () => import('D:/font/mydemo/ReactPress/docs/guide/a.jsx') },

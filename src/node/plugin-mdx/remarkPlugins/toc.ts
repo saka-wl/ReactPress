@@ -4,8 +4,9 @@ import Slugger from 'github-slugger';
 import { visit } from 'unist-util-visit';
 import { Root } from 'mdast';
 import type { MdxjsEsm } from 'mdast-util-mdxjs-esm';
-import { ecmaVersion, parse } from 'acorn';
-import { Program } from '@mdx-js/mdx/lib/core';
+// ecmaVersion,
+import { parse } from 'acorn';
+// import { Program } from '@mdx-js/mdx/lib/core';
 
 interface TocItem {
   id: string;
@@ -31,6 +32,7 @@ interface ChildNode {
  * @returns 
  */
 export const remarkPluginToc: Plugin<[], Root> = () => {
+  // https://www.npmjs.com/package/unist-util-visit
   return (tree) => {
     const toc: TocItem[] = [];
     const slugger = new Slugger();

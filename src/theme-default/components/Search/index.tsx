@@ -4,7 +4,7 @@ import styles from './index.module.scss';
 
 let controller = new AbortController();
 
-export default function Search() {
+export function Search() {
   const [isHitsShow, setIsHitsShow] = useState(false);
   const [value, setValue] = useState('');
   const [timer, setTimer] = useState(null);

@@ -2,7 +2,7 @@ import { usePageData } from '@runtime';
 import { NavItemWithLink } from 'shared/types';
 import styles from './index.module.scss';
 import { SwitchAppearance } from '../SwitchAppearance';
-import Search from '../Search';
+import { Search } from '../Search';
 
 function MenuItem({ item }: { item: NavItemWithLink; key: string }) {
   return (

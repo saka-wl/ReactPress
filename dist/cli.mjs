@@ -6,7 +6,7 @@ import {
   SERVER_ENTRY_PATH,
   createDevServer,
   createVitePlugins
-} from "./chunk-46ISPFHB.mjs";
+} from "./chunk-7PVYBJW4.mjs";
 import {
   __dirname,
   resolveConfig
@@ -348,26 +348,28 @@ import md5 from "md5";
 import fs4 from "fs-extra";
 import { join as join3 } from "path";
 async function handleAlgoliaJson(root, userConfig) {
-  let { nav: navs, sidebar: siders } = userConfig.siteData.themeConfig;
-  let json = [];
-  for (let { text: navText, link: navLink } of navs) {
+  const { nav: navs, sidebar: siders } = userConfig.siteData.themeConfig;
+  const json = [];
+  for (const { text: navText, link: navLink } of navs) {
     if (navLink === "/") continue;
-    for (let { text: siderText, items: siderItems } of siders[navLink]) {
-      for (let { text: itemText, link: itemLink } of siderItems) {
-        let tmp = {
+    for (const { text: siderText, items: siderItems } of siders[navLink]) {
+      for (const { text: itemText, link: itemLink } of siderItems) {
+        const tmp = {
           fileName: "",
           fileRoute: "",
           zip_code: "",
           objectID: ""
         };
         let filePath = "";
-        if (fs4.existsSync(join3(root, "." + itemLink) + ".mdx")) filePath = join3(root, "." + itemLink) + ".mdx";
-        if (fs4.existsSync(join3(root, "." + itemLink) + ".md")) filePath = join3(root, "." + itemLink) + ".md";
+        if (fs4.existsSync(join3(root, "." + itemLink) + ".mdx"))
+          filePath = join3(root, "." + itemLink) + ".mdx";
+        if (fs4.existsSync(join3(root, "." + itemLink) + ".md"))
+          filePath = join3(root, "." + itemLink) + ".md";
         if (filePath === "") continue;
         tmp.fileName = navText + "-" + siderText + "-" + itemText;
         tmp.fileRoute = itemLink;
-        tmp.zip_code = (await fs4.readFile(filePath, "utf-8")).replaceAll("\n", "").replaceAll(" ", "").replace(/!\[(.*?)\]\((.*?)\)/mg, "").replace(/\[(.*?)\]\((.*?)\)/mg, "").replace(/\r/mg, "").replace(/```(.*?)```/mg, "");
-        let tmpMd5 = await md5(tmp.zip_code);
+        tmp.zip_code = (await fs4.readFile(filePath, "utf-8")).replaceAll("\n", "").replaceAll(" ", "").replace(/!\[(.*?)\]\((.*?)\)/gm, "").replace(/\[(.*?)\]\((.*?)\)/gm, "").replace(/\r/gm, "").replace(/```(.*?)```/gm, "");
+        const tmpMd5 = await md5(tmp.zip_code);
         tmp.objectID = Date.now().toString().substring(6, 12) + "-" + tmpMd5;
         json.push(tmp);
       }
@@ -418,10 +420,8 @@ cli.command("server [... args]", "add a server by node-express").option("--port 
     console.log(e);
   }
 });
-cli.command("getJson [root]").action(
-  async (root) => {
-    const config = await resolveConfig(root, "build", "production");
-    await handleAlgoliaJson(root, config);
-  }
-);
+cli.command("getJson [root]").action(async (root) => {
+  const config = await resolveConfig(root, "build", "production");
+  await handleAlgoliaJson(root, config);
+});
 cli.parse();

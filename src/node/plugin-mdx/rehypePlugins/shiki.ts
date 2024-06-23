@@ -1,6 +1,7 @@
 import { visit } from 'unist-util-visit';
 import type { Plugin } from 'unified';
 import type { Text, Root } from 'hast';
+// https://www.npmjs.com/package/hast-util-from-html
 import { fromHtml } from 'hast-util-from-html';
 // 用于完成代码高亮
 // import shiki from 'shiki';
@@ -55,7 +56,7 @@ export const rehypePluginShiki: Plugin<[Options], Root> = ({ codeToHtml }) => {
          * </pre>'
          */
         const highlightedCode = codeToHtml(codeContent, { lang });
-        // AST转换为js的格式
+        // html string -> hast
         const fragmentAST = fromHtml(highlightedCode, { fragment: true });
         parent.children.splice(index, 1, ...fragmentAST.children);
       }

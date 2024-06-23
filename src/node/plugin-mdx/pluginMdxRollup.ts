@@ -3,11 +3,13 @@ import pluginMdx from '@mdx-js/rollup';
 import type { Plugin } from 'vite';
 // 生成github风格的GFM(Markdown)
 import remarkPluginGFM from 'remark-gfm';
+// https://www.npmjs.com/package/rehype-autolink-headings
 import rehypePluginAutolinkHeadings from 'rehype-autolink-headings';
-// 添加id属性
+// 添加id属性 https://www.npmjs.com/package/rehype-slug
 import rehypePluginSlug from 'rehype-slug';
-// 将mdx文件中命名的变量提取出来
+// https://www.npmjs.com/package/remark-mdx-frontmatter 生成ESM导出信息
 import remarkMdxFrontmatter from 'remark-mdx-frontmatter';
+// https://www.npmjs.com/package/remark-frontmatter 获取元信息
 import remarkFrontmatter from 'remark-frontmatter';
 import { rehypePluginPreWrapper } from './rehypePlugins/preWrapper';
 import { rehypePluginShiki } from './rehypePlugins/shiki';
@@ -22,12 +24,14 @@ export async function pluginMdxRollup(): Promise<Plugin> {
     })
   ).codeToHtml;
   return pluginMdx({
+    // 对mdast的处理
     remarkPlugins: [
       remarkPluginGFM,
       remarkFrontmatter,
       [remarkMdxFrontmatter, { name: 'frontmatter' }],
       remarkPluginToc
     ],
+    // 对HTML的AST的处理
     rehypePlugins: [
       rehypePluginSlug,
       [

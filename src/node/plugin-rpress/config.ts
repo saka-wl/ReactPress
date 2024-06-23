@@ -61,6 +61,7 @@ export function pluginConfig(
     },
     /**
      * 配置文件热更新，配置文件修改时重新启动服务
+     * 监听文件的更新，如果包括用户自定义配置文件，那就直接重启服务
      * @param ctx
      */
     async handleHotUpdate(ctx) {

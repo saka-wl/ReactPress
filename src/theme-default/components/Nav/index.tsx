@@ -16,6 +16,7 @@ export function Nav() {
   const { siteData } = usePageData();
   const nav = siteData?.themeConfig?.nav || [];
   const githubLink = siteData.github || 'https://github.com';
+  const { algoliasearch_url } = siteData;
 
   return (
     <header fixed="~" pos="t-0 l-0" w="full" z="10">
@@ -35,7 +36,7 @@ export function Nav() {
           </a>
         </div>
         <div>
-          <Search __rpress />
+          <Search __rpress algoliasearchUrl={algoliasearch_url} />
         </div>
         <div flex="~">
           <div flex="~">
@@ -53,7 +54,8 @@ export function Nav() {
             before="menu-item-before"
           >
             <a href={githubLink}>
-              <div className="i-carbon-logo-github w-5 h-5 fill-current"></div>
+              {/* <div className="i-carbon-logo-github w-5 h-5 fill-current"></div> */}
+              <div className="i-line-md:github-loop w-5 h-5 fill-current"></div>
             </a>
           </div>
         </div>

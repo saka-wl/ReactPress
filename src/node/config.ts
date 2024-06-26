@@ -70,7 +70,8 @@ export function resolveSiteData(userConfig: UserConfig): UserConfig {
     title: userConfig.title || 'Rpress.js',
     description: userConfig.description || 'SSG Framework',
     themeConfig: userConfig.themeConfig || ({} as ThemeConfig),
-    vite: userConfig.vite || {}
+    vite: userConfig.vite || {},
+    algoliasearch_url: userConfig.algoliasearch_url || ''
   };
 }
 

@@ -146,5 +146,6 @@ export default defineConfig({
     },
     'title': 'SAKA_WL',
     'github': 'https://github.com/saka-wl/reactpress',
-    'vite': {}
+    'vite': {},
+    'algoliasearch_url': 'http://127.0.0.1:5008/searchFileFromLocal'
 })

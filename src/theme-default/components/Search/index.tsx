@@ -1,65 +1,66 @@
 import { useState } from 'react';
 import Hit, { HitProps } from './Hit';
 import styles from './index.module.scss';
+import { Iprops, fetchValue } from './request';
 
-let controller = new AbortController();
-
-export function Search() {
+export function Search(props: Iprops) {
   const [isHitsShow, setIsHitsShow] = useState(false);
   const [value, setValue] = useState('');
   const [timer, setTimer] = useState(null);
   const [list, setList] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const fetchValue = (val: string) => {
-    controller && controller.abort();
-    controller = new AbortController();
-    return fetch('http://127.0.0.1:5008/searchFile', {
-      method: 'post',
-      signal: controller.signal,
-      body: JSON.stringify({
-        searchQuery: val
-      }),
-      mode: 'cors',
-      headers: {
-        'Content-Type': 'application/json'
+  const HitBox = (
+    <div
+      className={
+        styles.hitBgColor +
+        ' fixed top-56px left-0px h-full w-full flex justify-center'
       }
-    })
-      .then((response) => response.json())
-      .then(({ code, data }) => {
-        if (code === 201) return;
-        if (code === 500) return;
-        if (code === 200) {
-          setList(
-            data.map((it) => ({
-              fileName: it.fileName,
-              fileRoute: it.fileRoute,
-              zipCode: it.zip_code.replaceAll(
-                `${val}`,
-                `<span style='color: var(--rpress-c-blue-lighter);font-weight: bold;'>${val}</span>`
-              ),
-              key: it.objectID
-            }))
-          );
+      onClick={(e) => {
+        setIsHitsShow(false);
+      }}
+    >
+      <div
+        className={
+          styles.scrollBox +
+          ' absolute w-550px max-h-400px min-h-50px rounded-lg overflow-y-scroll z-1000 bg-white mt-100px dark:bg-#0f172a'
         }
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-  };
+        onClick={(e) => {
+          e.stopPropagation();
+        }}
+      >
+        {isLoading ? (
+          <div className="i-line-md:loading-loop w-32px h-32px dark-text-white text-black"></div>
+        ) : (
+          list.map((it: HitProps) => (
+            <Hit
+              fileName={it.fileName}
+              fileRoute={it.fileRoute}
+              zipCode={it.zipCode}
+              key={it.key}
+            />
+          ))
+        )}
+      </div>
+    </div>
+  );
 
   return (
     <>
       <div
         className={
-          styles.box +
-          ' rounded-lg flex w-152px h-40px relative transition duration-300'
+          styles.box + ' rounded-lg flex w-152px h-40px transition duration-300'
         }
         style={{ backgroundColor: 'var(--rpress-searchBox-bg)' }}
       >
         <div
-          className="i-carbon:search-advanced w-20px h-20px transition duration-300 mt--5px ml-5px mr-5px self-center"
+          className="i-line-md:search w-19px h-19px transition duration-300 ml-5px mr-5px self-center"
           style={{ color: 'var(--rpress-searchBox-icon)' }}
         ></div>
+        {/* <div
+          className="i-carbon:search-advanced w-20px h-20px transition duration-300 mt--5px ml-5px mr-5px self-center"
+          style={{ color: 'var(--rpress-searchBox-icon)' }}
+        ></div> */}
         <input
           type="text"
           placeholder="Search"
@@ -70,7 +71,15 @@ export function Search() {
             !isHitsShow && setIsHitsShow(true);
             if (timer) clearTimeout(timer);
             const tmp = setTimeout(() => {
-              fetchValue(e.target.value);
+              !isLoading && setIsLoading(true);
+              fetchValue(
+                e.target.value,
+                props.algoliasearchUrl,
+                setList,
+                () => {
+                  setIsLoading(false);
+                }
+              );
             }, 400);
             setTimer(tmp);
           }}
@@ -78,31 +87,8 @@ export function Search() {
             !isHitsShow && setIsHitsShow(true);
           }}
         />
-        {isHitsShow ? (
-          <div
-            className={
-              styles.scrollBox +
-              ' absolute top-40px left--204px w-570px max-h-700px rounded-lg overflow-y-scroll'
-            }
-            style={{ backgroundColor: 'var(--rpress-searchBox-bg)' }}
-          >
-            <div
-              className="i-carbon:close-outline w-23px h-23px transition duration-300 ml-530px mt-10px cursor-pointer"
-              style={{ color: 'var(--rpress-searchBox-icon)' }}
-              onClick={() => setIsHitsShow(false)}
-            ></div>
-            {list.map((it: HitProps) => (
-              <Hit
-                fileName={it.fileName}
-                fileRoute={it.fileRoute}
-                zipCode={it.zipCode}
-                key={it.key}
-              />
-            ))}
-          </div>
-        ) : (
-          ''
-        )}
+
+        {isHitsShow ? HitBox : ''}
       </div>
     </>
   );

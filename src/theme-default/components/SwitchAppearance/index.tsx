@@ -34,10 +34,12 @@ export function SwitchAppearance() {
   return (
     <Switch onClick={toggle}>
       <div className={styles.sun}>
-        <div className="i-carbon-sun" w="full" h="full"></div>
+        {/* <div className="i-carbon-sun" w="full" h="full"></div> */}
+        <div className="i-line-md:moon-filled-to-sunny-filled-loop-transition w-full h-full"></div>
       </div>
       <div className={styles.moon}>
-        <div className="i-carbon-moon" w="full" h="full"></div>
+        {/* <div className="i-carbon-moon" w="full" h="full"></div> */}
+        <div className="i-line-md:sunny-filled-loop-to-moon-alt-filled-loop-transition w-full h-full"></div>
       </div>
     </Switch>
   );

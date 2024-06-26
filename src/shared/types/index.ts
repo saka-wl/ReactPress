@@ -37,6 +37,7 @@ export interface UserConfig {
   themeConfig: ThemeConfig;
   vite: ViteConfiguration;
   github?: string;
+  algoliasearch_url?: string;
 }
 
 export interface SiteConfig {

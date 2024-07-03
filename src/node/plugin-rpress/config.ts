@@ -19,7 +19,6 @@ export function pluginConfig(
   return {
     name: SITE_DATA_ID,
     resolveId(id) {
-      // console.log(id)
       if (id === SITE_DATA_ID) {
         return '\0' + SITE_DATA_ID;
       }
@@ -69,7 +68,7 @@ export function pluginConfig(
       const customWatchedFiles = [config.configPath.replaceAll('\\', '/')];
       const include = (id: string) =>
         customWatchedFiles.some((file) => id.includes(file));
-      // console.log(ctx.file, config.configPath, include(ctx.file))
+
       if (include(ctx.file)) {
         console.log(
           `\n${relative(config.root, ctx.file)} changed, restarting server...`

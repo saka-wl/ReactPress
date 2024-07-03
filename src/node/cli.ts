@@ -64,6 +64,9 @@ cli
     }
   });
 
+/**
+ * 添加express框架的代码
+ */
 cli
   .command('server [... args]', 'add a server by node-express')
   .option('--port <port>', 'port to use for adding a server')

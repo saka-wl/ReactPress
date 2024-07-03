@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import Hit, { HitProps } from './Hit';
 import styles from './index.module.scss';
 import { Iprops, fetchValue } from './request';
@@ -6,7 +6,8 @@ import { Iprops, fetchValue } from './request';
 export function Search(props: Iprops) {
   const [isHitsShow, setIsHitsShow] = useState(false);
   const [value, setValue] = useState('');
-  const [timer, setTimer] = useState(null);
+  // const [timer, setTimer] = useState(null);
+  const timer = useRef(null);
   const [list, setList] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -69,7 +70,7 @@ export function Search(props: Iprops) {
           onInput={(e) => {
             setValue(e.target.value);
             !isHitsShow && setIsHitsShow(true);
-            if (timer) clearTimeout(timer);
+            if (timer.current) clearTimeout(timer.current);
             const tmp = setTimeout(() => {
               !isLoading && setIsLoading(true);
               fetchValue(
@@ -81,7 +82,7 @@ export function Search(props: Iprops) {
                 }
               );
             }, 400);
-            setTimer(tmp);
+            timer.current = tmp;
           }}
           onClick={() => {
             !isHitsShow && setIsHitsShow(true);

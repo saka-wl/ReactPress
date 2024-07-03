@@ -19,12 +19,12 @@ export interface IsearchFetchApi {
 let controller = new AbortController();
 
 const fetchApi = async (url: string, val: string): Promise<IsearchFetchApi> => {
-  const resp = await fetch(url, {
-    method: 'post',
+  const resp = await fetch(url + `?searchQuery=${val}`, {
+    method: 'get',
     signal: controller.signal,
-    body: JSON.stringify({
-      searchQuery: val
-    }),
+    // body: JSON.stringify({
+    //   searchQuery: val
+    // }),
     mode: 'cors',
     headers: {
       'Content-Type': 'application/json'

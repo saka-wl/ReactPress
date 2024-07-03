@@ -27,14 +27,13 @@ export async function createVitePlugins(
       pluginUnocss(unocssOptions),
       pluginIndexHtml(),
       pluginReact({
+        // jsx转化js方式
         jsxRuntime: 'automatic',
+        // include: /\.(js|jsx|ts|tsx|mdx)$/,
         // 控制jsx的导入位置
         jsxImportSource: isSSR
           ? path.join(PACKET_ROOT, 'src', 'runtime')
           : 'react'
-        // babel: {
-        //   plugins: [babelPluginRpress]
-        // }
       }),
       pluginConfig(config, restart),
       pluginRoutes({
@@ -47,7 +46,6 @@ export async function createVitePlugins(
     const { visualizer } = await dynamicImport('rollup-plugin-visualizer');
     return [
       pluginUnocss(unocssOptions),
-      // pluginIndexHtml(),
       pluginReact({
         jsxRuntime: 'automatic',
         // 控制jsx的导入位置

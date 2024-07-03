@@ -55,7 +55,7 @@ export const addExpressServer = async (
   port: number,
   linux: string
 ) => {
-  // console.dir(linux)
+  console.log(linux);
   fs.existsSync(join(__dirname, '../server')) &&
     (await fs.remove(join(__dirname, '../server')));
   const originFileDir = join(root, './build');

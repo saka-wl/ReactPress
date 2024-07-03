@@ -7,7 +7,6 @@ export function pluginIndexHtml(): Plugin {
     name: 'rpress:index-html',
     /**
      * 在template.html中加入script标签，可以修改html内容，直接将client-entry入口文件引入
-     * 但为何可以读取文件内容呢？因为加入了react插件
      * 介绍：https://juejin.cn/post/7210278786592292920#heading-3
      * https://juejin.cn/post/7185164908885966907  about /@fs
      * @param html
@@ -38,10 +37,11 @@ export function pluginIndexHtml(): Plugin {
         server.middlewares.use(async (req, res) => {
           // 1. 读取template.html内容
           let content = await readFile(DEFAULT_TEMPLATE_PATH, 'utf-8');
+
           content = await server.transformIndexHtml(
             req.url,
-            content,
-            req.originalUrl
+            content
+            // req.originalUrl
           );
           // 2. 通过整理的res对象响应给浏览器
           res.setHeader('Content-Type', 'text/html');

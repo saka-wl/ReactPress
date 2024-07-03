@@ -64,7 +64,7 @@ async function buildRpress(
       // https://segmentfault.com/a/1190000043830025#item-3-4
       {
         name: 'rpress:inject',
-        enforce: 'post',
+        enforce: 'post', // 最后再处理入口文件
         // rpress:inject../../components/Aside/index!!RPRESS!!D:/font/mydemo/ReactPress/src/theme-default/Layout/DocLayout/index.tsx
         async resolveId(id) {
           if (id.includes(MASK_SPLITTER)) {
@@ -126,9 +126,11 @@ export async function renderPage(
   fs.existsSync(join(root, '.temp')) && (await fs.remove(join(root, '.temp')));
   // clientBundle中是一些依赖包的打包结果
   const recordRpress = {};
-  const clientChunk = clientBundle.output.find(
-    (chunk) => chunk.type === 'chunk' && chunk.isEntry
-  );
+
+  const clientChunk = clientBundle.output.find((chunk) => {
+    console.log(chunk);
+    return chunk.type === 'chunk' && chunk.isEntry;
+  });
 
   const handleRoutes = async (route) => {
     const routePath = route.path;
@@ -172,7 +174,6 @@ export async function renderPage(
     if (lastIndex > 0 && lastIndex < routePath.length - 1) {
       flag = '.';
     }
-
     const html = `
 <!DOCTYPE html>
 <html>
@@ -301,6 +302,7 @@ export async function bundle(root: string, config: SiteConfig) {
         }
       };
     };
+
     const clientBuild = async () => {
       const client = await resolveViteConfig(false);
       return await viteBuild(client);

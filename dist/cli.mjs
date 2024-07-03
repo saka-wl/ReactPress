@@ -6,7 +6,7 @@ import {
   SERVER_ENTRY_PATH,
   createDevServer,
   createVitePlugins
-} from "./chunk-QVWUPU5V.mjs";
+} from "./chunk-BII3GNSL.mjs";
 import {
   __dirname,
   resolveConfig
@@ -55,6 +55,7 @@ async function buildRpress(root, rpressToPathMap) {
       {
         name: "rpress:inject",
         enforce: "post",
+        // 最后再处理入口文件
         // rpress:inject../../components/Aside/index!!RPRESS!!D:/font/mydemo/ReactPress/src/theme-default/Layout/DocLayout/index.tsx
         async resolveId(id) {
           if (id.includes(MASK_SPLITTER)) {
@@ -90,7 +91,10 @@ async function renderPage(render, root, clientBundle, routes) {
   fs.existsSync(join(root, ".temp")) && await fs.remove(join(root, ".temp"));
   const recordRpress = {};
   const clientChunk = clientBundle.output.find(
-    (chunk) => chunk.type === "chunk" && chunk.isEntry
+    (chunk) => {
+      console.log(chunk);
+      return chunk.type === "chunk" && chunk.isEntry;
+    }
   );
   const handleRoutes = async (route) => {
     const routePath = route.path;
@@ -324,6 +328,7 @@ function startServer(root, port) {
 startServer('${root}', ${port})  
 `;
 var addExpressServer = async (root, port, linux) => {
+  console.log(linux);
   fs3.existsSync(join2(__dirname, "../server")) && await fs3.remove(join2(__dirname, "../server"));
   const originFileDir = join2(root, "./build");
   await fs3.ensureDir(join2(__dirname, "../server"));

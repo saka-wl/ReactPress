@@ -6,3 +6,5 @@
 5. algoliasearch好卡，还是自己写一个数据库吧，使用mongo吧
 6/26
 6. @iconify-json/carbon的icon好丑，换成@iconify-json/line-md吧
+6/26
+7. 开发模式下，两次请求问题

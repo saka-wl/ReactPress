@@ -46,6 +46,10 @@ export default defineConfig({
                         {
                             text: "hydrates组件如何实现",
                             link: "/theory/theory_06_hy_create"
+                        },
+                        {
+                            text: "部署时的rpress",
+                            link: "/theory/theory_20_serverRpress"
                         }
                     ]
                 },

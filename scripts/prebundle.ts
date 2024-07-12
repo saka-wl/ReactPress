@@ -6,6 +6,7 @@ import { normalizePath } from "vite";
 
 const PRE_BUNDLE_DIR = 'vendors';
 
+// https://esbuild.github.io/plugins/#finding-plugins
 async function preBundle(deps: string[]) {
     const flattenDepMap = {} as Record<string, string>
     deps.map((item) => {
@@ -43,7 +44,7 @@ async function preBundle(deps: string[]) {
                         if (!deps.includes(args.path)) {
                             return;
                         }
-                        console.log(args.path, args.importer)
+                        // console.log(args.path, args.importer)
                         // 父模块路径，即依赖的入口路径
                         const isEntry = !args.importer;
                         // 获取绝对路径

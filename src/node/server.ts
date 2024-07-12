@@ -1,6 +1,6 @@
 import fs from 'fs-extra';
 import { join } from 'path';
-import { exec, spawn } from 'child_process';
+import { exec } from 'child_process';
 
 const template = (root: string, port: number) => `
 const compression = require("compression")
@@ -55,7 +55,7 @@ export const addExpressServer = async (
   port: number,
   linux: string
 ) => {
-  console.log(linux);
+  // console.log(linux);
   fs.existsSync(join(__dirname, '../server')) &&
     (await fs.remove(join(__dirname, '../server')));
   const originFileDir = join(root, './build');

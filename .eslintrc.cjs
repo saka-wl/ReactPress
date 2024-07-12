@@ -23,7 +23,8 @@ module.exports = {
         semi: ['error', 'always'],
         '@typescript-eslint/no-non-null-assertion': 'off',
         'react/react-in-jsx-scope': 'off',
-        'react/no-unknown-property': 'off'
+        'react/no-unknown-property': 'off',
+        "@typescript-eslint/ban-types": 'off'
     },
     settings: {
         react: {

@@ -90,12 +90,10 @@ async function renderPage(render, root, clientBundle, routes) {
   console.log("Rendering page in server side...");
   fs.existsSync(join(root, ".temp")) && await fs.remove(join(root, ".temp"));
   const recordRpress = {};
-  const clientChunk = clientBundle.output.find(
-    (chunk) => {
-      console.log(chunk);
-      return chunk.type === "chunk" && chunk.isEntry;
-    }
-  );
+  const clientChunk = clientBundle.output.find((chunk) => {
+    console.log(chunk);
+    return chunk.type === "chunk" && chunk.isEntry;
+  });
   const handleRoutes = async (route) => {
     const routePath = route.path;
     const helmetContext = {

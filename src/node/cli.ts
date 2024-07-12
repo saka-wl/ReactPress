@@ -10,6 +10,12 @@ import { handleAlgoliaJson } from './getAlgoliaJson';
 
 const cli = cac('rpress').version('0.0.1').help();
 
+// rpress dev [root]
+// rpress build [root]
+// rpress preview [root]
+// rpress server [root]
+// rpress getJson [root]
+
 /**
  * 创建一个npm命令
  */

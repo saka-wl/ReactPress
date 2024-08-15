@@ -326,7 +326,6 @@ function startServer(root, port) {
 startServer('${root}', ${port})  
 `;
 var addExpressServer = async (root, port, linux) => {
-  console.log(linux);
   fs3.existsSync(join2(__dirname, "../server")) && await fs3.remove(join2(__dirname, "../server"));
   const originFileDir = join2(root, "./build");
   await fs3.ensureDir(join2(__dirname, "../server"));
